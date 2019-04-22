@@ -1,0 +1,43 @@
+nginx:
+  container_name: nginx
+  build: ./nginx
+  ports:
+    - "80:80"
+    - "443:443"
+  volumes:
+    - D:/myproject/:/usr/share/nginx/html
+    - ./nginx/conf/conf.d/:/etc/nginx/conf.d
+  links:
+    - php-fpm
+
+php-fpm:
+    container_name: php-fpm
+    build: ./php
+    volumes:
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+      - D:/myproject/:/var/www/html
+    restart: always
+    links:
+      - mysql
+      - redis
+
+mysql:
+    container_name: mysql
+    build: ./mysql
+    environment:
+        MYSQL_ROOT_PASSWORD: "123456"
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+
+redis:
+    container_name: redis
+    build: ./redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command:
+      redis-server

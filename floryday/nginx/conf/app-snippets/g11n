@@ -1,0 +1,20 @@
+set $lang_code en;
+set $web_root /;
+if ($host ~* ^(no|de)\.) {
+        set $lang_code $1;
+        set $web_root /$lang_code/;
+}
+
+if ($host ~* \.(no|de)$) {
+        set $lang_code $1;
+        set $web_root /$lang_code/;
+}
+
+if ($uri ~* ^/(no|de)/) {
+        set $lang_code $1;
+        set $web_root /$lang_code/;
+}
+
+if ($uri ~* ^/(fr|es|se|da|fi|ru|nl|it|pt|ar|be|hr|cs|et|el|ht|he|hu|is|ga|ja|ko|lt|ms|mt|pl|sk|sl|tr)/) {
+        rewrite . /de/ redirect;
+}

@@ -1,0 +1,20 @@
+nginx:
+  container_name: fd_nginx
+  build: ./nginx
+  ports:
+    - "80:80"
+    - "443:443"
+  volumes:
+    - D:/myproject/:/usr/share/nginx/html
+    - /usr/share/nginx/html/vb/floryday/src/php/webapp/en
+  links:
+    - php-fpm
+
+php-fpm:
+    container_name: fd_php-fpm
+    build: ./php
+    volumes:
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+      - D:/myproject/:/var/www/html
+      - /var/www/html/vb/floryday/src/php/webapp/en
+    restart: always
