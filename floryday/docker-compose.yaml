@@ -6,7 +6,7 @@ nginx:
     - "443:443"
   volumes:
     - D:/myproject/:/usr/share/nginx/html
-    - /usr/share/nginx/html/vb/floryday/src/php/webapp/en
+    - ./nginx/conf/conf.d:/etc/nginx/conf.d
   links:
     - php-fpm
 
@@ -15,6 +15,5 @@ php-fpm:
     build: ./php
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
-      - D:/myproject/:/var/www/html
-      - /var/www/html/vb/floryday/src/php/webapp/en
+      - D:/myproject/:/usr/share/nginx/html
     restart: always

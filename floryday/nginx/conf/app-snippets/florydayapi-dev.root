@@ -1,1 +1,1 @@
-set $prjroot E:/awnmp/web/fdapi;
+set $prjroot /usr/share/nginx/html/vb/fd_restful_api;

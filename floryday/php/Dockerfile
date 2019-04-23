@@ -3,7 +3,6 @@ FROM php:7.1-fpm
 ENV TZ=Asia/Shanghai
 
 COPY ./php-7.1.28.tar.gz /tmp/
-COPY ./init.sh /tmp/
 
 RUN docker-php-ext-install mysqli
 RUN docker-php-ext-install pdo_mysql

@@ -3,6 +3,7 @@ FROM nginx
 COPY ./conf/conf.d /etc/nginx/conf.d
 COPY ./conf/app-snippets /etc/nginx/app-snippets
 COPY ./conf/ssl /etc/nginx/ssl
+COPY ./init.sh /tmp/
 
 ENV TZ=Asia/Shanghai
 
@@ -24,4 +25,4 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
     ###ll命令##
     && echo "alias ll='ls -l'" >> ~/.bashrc && /bin/bash -c "source ~/.bashrc" \
     ###ps命令###
-    && apt-get update && apt-get install -y procps \
+    && apt-get update && apt-get install -y procps
