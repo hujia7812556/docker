@@ -1,6 +1,6 @@
 location ~* ^/xhprof_html/.*$ {
     root "${prjroot}/vendor/facebook/xhprof";
-    fastcgi_pass   127.0.0.1:9000;
+    fastcgi_pass   fd_php-fpm:9000;
     fastcgi_index  index.php;
     fastcgi_param  SCRIPT_FILENAME  "${prjroot}vendor/facebook/xhprof/$fastcgi_script_name";
     include        fastcgi_params;

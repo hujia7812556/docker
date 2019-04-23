@@ -29,6 +29,8 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
     && apt-get update && apt-get install -y procps \
     ####依赖安装###### 
     && apt-get install -y libssl-dev \
+    && apt-get install -y zip \
+    && apt-get install -y unzip \
     ####redis
     && yes | pecl install igbinary -o -f \
     && apt-get update && yes | pecl install -o -f redis  \
@@ -72,5 +74,26 @@ RUN cd /tmp \
     --with-php-config=/usr/local/bin/php-config \
     --with-kerberos \
     --with-imap-ssl \
+    && make clean && make && make install \
+    ##libmemecached
+    && cd /tmp \
+    && curl -O https://launchpadlibrarian.net/165454254/libmemcached-1.0.18.tar.gz \
+    && tar zxvf ./libmemcached-1.0.18.tar.gz \
+    && cd libmemcached-1.0.18 \
+    && ./configure \
+    --prefix=/usr/local/libmemcached \
+    && make clean && make && make install \
+    ##memcached
+    && apt-get install zlib1g \
+    && apt-get install zlib1g.dev \
+    && cd /tmp \
+    && curl -o php-memcached.zip https://codeload.github.com/php-memcached-dev/php-memcached/zip/master \
+    && unzip ./php-memcached.zip \
+    && cd php-memcached-master \
+    && phpize && \
+    ./configure \
+    --with-php-config=/usr/local/bin/php-config \
+    --with-libmemcached-dir=/usr/local/libmemcached \
+    --disable-memcached-sasl \
     && make clean && make && make install
 RUN yes | pecl install swoole -o -f

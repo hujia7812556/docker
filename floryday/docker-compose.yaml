@@ -17,3 +17,13 @@ php-fpm:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - D:/myproject/:/usr/share/nginx/html
     restart: always
+    links:
+      - memcached
+memcached:
+    container_name: fd_memcached
+    build: ./memcached
+    restart: always
+    ports:
+      - "11211:11211"
+    environment:
+      - MEMCACHED_CACHE_SIZE=128
