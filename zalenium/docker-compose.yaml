@@ -1,0 +1,15 @@
+zalenium:
+    container_name: zalenium
+    build: ./zalenium
+    ports:
+      - "4444:4444"
+    command:
+      docker run --rm -ti --name zalenium -p 4444:4444 \
+      -v //var/run/docker.sock:/var/run/docker.sock \
+      --timeZone Asia/Shanghai \
+      --privileged dosel/zalenium start
+    links:
+      - selenium
+selenium:
+    container_name: selenium
+    image: elgalu/selenium
