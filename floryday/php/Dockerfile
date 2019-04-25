@@ -40,6 +40,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
     && /usr/local/bin/phpize \
     && ./configure --with-php-config=/usr/local/bin/php-config \
     && make && make install \
+    && rm -rf /var/tmp/xhprof && mkdir /var/tmp/xhprof && chmod -R 777 /var/tmp/xhprof \
     ####xdebug
     && apt-get update && yes | pecl install -o -f xdebug \
     # oauth
