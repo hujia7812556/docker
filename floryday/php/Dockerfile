@@ -96,5 +96,11 @@ RUN cd /tmp \
     --with-php-config=/usr/local/bin/php-config \
     --with-libmemcached-dir=/usr/local/libmemcached \
     --disable-memcached-sasl \
+    && make clean && make && make install \
+    ## opcache
+    && cd /tmp/php-7.1.28/ext/opcache/ \
+    && phpize && \
+    ./configure \
+    --with-php-config=/usr/local/bin/php-config \
     && make clean && make && make install
 RUN yes | pecl install swoole -o -f
