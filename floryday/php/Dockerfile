@@ -18,6 +18,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
 	&& echo "deb-src http://mirrors.aliyun.com/debian/ stretch-updates main non-free contrib" >> /etc/apt/sources.list \
 	&& echo "deb http://mirrors.aliyun.com/debian/ stretch-backports main non-free contrib" >> /etc/apt/sources.list \
 	&& echo "deb-src http://mirrors.aliyun.com/debian/ stretch-backports main non-free contrib" >> /etc/apt/sources.list \
+    && echo "deb http://ftp.cn.debian.org/debian stretch main" >> /etc/apt/sources.list \
     && apt-get update \
     && apt-get install git -y \
     ####
@@ -104,3 +105,7 @@ RUN cd /tmp \
     --with-php-config=/usr/local/bin/php-config \
     && make clean && make && make install
 RUN yes | pecl install swoole -o -f
+RUN yes | pecl install apcu -o -f
+RUN apt-get install graphviz -y
+RUN curl -sS https://getcomposer.org/installer | php && \
+    mv composer.phar /usr/local/bin/composer
