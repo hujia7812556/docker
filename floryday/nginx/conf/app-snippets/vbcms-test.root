@@ -1,1 +1,1 @@
-set $prjroot E:/awnmp/web/vb_cms;
+set $prjroot /usr/share/nginx/html/vb/vb_cms;

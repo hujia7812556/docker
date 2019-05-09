@@ -9,16 +9,23 @@ nginx:
     - ./nginx/conf/conf.d:/etc/nginx/conf.d
   links:
     - php-fpm
+    - php-fpm-5.6
 
 php-fpm:
     container_name: fd_php-fpm
     build: ./php
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
+      - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
       - D:/myproject/:/usr/share/nginx/html
     restart: always
     links:
       - memcached
+php-fpm-5.6:
+    container_name: fd_php-fpm-5.6
+    build: ./php-fpm-5.6
+    volumes:
+      - D:/myproject/:/usr/share/nginx/html
 memcached:
     container_name: fd_memcached
     build: ./memcached
@@ -27,3 +34,10 @@ memcached:
       - "11211:11211"
     environment:
       - MEMCACHED_CACHE_SIZE=128
+search:
+    container_name: fd_search
+    build: ./search
+    environment:
+      TZ: "Asia/Shanghai"
+    volumes:
+      - D:/myproject/:/usr/share/nginx/html
