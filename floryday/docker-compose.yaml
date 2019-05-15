@@ -21,11 +21,14 @@ php-fpm:
     restart: always
     links:
       - memcached
+      - search
 php-fpm-5.6:
     container_name: fd_php-fpm-5.6
     build: ./php-fpm-5.6
     volumes:
       - D:/myproject/:/usr/share/nginx/html
+    ports:
+    - "9001:9000"
 memcached:
     container_name: fd_memcached
     build: ./memcached
@@ -35,9 +38,10 @@ memcached:
     environment:
       - MEMCACHED_CACHE_SIZE=128
 search:
-    container_name: fd_search
+    container_name: search
     build: ./search
-    environment:
-      TZ: "Asia/Shanghai"
     volumes:
-      - D:/myproject/:/usr/share/nginx/html
+      - D:/myproject/vb/vb-search/target/search /usr/local/tomcat/webapps/search
+      - D:/myproject/vb/vb-search/target/index  /var/data/index
+    ports:
+      - "8080:8080"

@@ -44,5 +44,7 @@ RUN apk add --update --no-cache git \
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
+RUN chmod -R 777 /var/log
+
 WORKDIR /var/www/web
 VOLUME  ["/var/www/web"]
