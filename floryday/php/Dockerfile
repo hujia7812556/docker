@@ -107,5 +107,25 @@ RUN cd /tmp \
 RUN yes | pecl install swoole -o -f
 RUN yes | pecl install apcu -o -f
 RUN apt-get install graphviz -y
+RUN yes | pecl install mongodb
+##rabbitmq
+RUN apt-get install cmake -y
+RUN cd /tmp && rm -rf rabbitmq-c-0.9.0 && \
+    curl -o rabbitmq-c-0.9.0.tar.gz https://codeload.github.com/alanxz/rabbitmq-c/tar.gz/v0.9.0 && \
+    tar zxvf rabbitmq-c-0.9.0.tar.gz && \
+    cd rabbitmq-c-0.9.0 && mkdir build && cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local/librabbitmq .. && \
+    cmake --build . && \
+    make clean && make && make install
+RUN cp -i -rf /usr/local/librabbitmq/lib/x86_64-linux-gnu/* /usr/local/librabbitmq/lib/
+RUN yes /usr/local/librabbitmq | pecl install amqp
+##zookeeper
+RUN cd /tmp && rm -rf zookeeper-3.4.14 && \
+    curl -o zookeeper-3.4.14.tar.gz https://mirrors.tuna.tsinghua.edu.cn/apache/zookeeper/zookeeper-3.4.14/zookeeper-3.4.14.tar.gz && \
+    tar zxvf zookeeper-3.4.14.tar.gz && \
+    cd zookeeper-3.4.14/zookeeper-client/zookeeper-client-c && \
+    ./configure \
+    --prefix=/usr/local/zookeeper && \
+    make clean && make && make install
 RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer

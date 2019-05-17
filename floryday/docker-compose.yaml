@@ -21,6 +21,7 @@ php-fpm:
     restart: always
     links:
       - memcached
+    external_links:
       - search
 php-fpm-5.6:
     container_name: fd_php-fpm-5.6
@@ -37,11 +38,3 @@ memcached:
       - "11211:11211"
     environment:
       - MEMCACHED_CACHE_SIZE=128
-search:
-    container_name: search
-    build: ./search
-    volumes:
-      - D:/myproject/vb/vb-search/target/search /usr/local/tomcat/webapps/search
-      - D:/myproject/vb/vb-search/target/index  /var/data/index
-    ports:
-      - "8080:8080"
