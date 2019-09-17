@@ -1,16 +1,3 @@
-nginx:
-  container_name: fd_nginx
-  build: ./nginx
-  ports:
-    - "80:80"
-    - "443:443"
-  volumes:
-    - D:/myproject/:/usr/share/nginx/html
-    - ./nginx/conf/conf.d:/etc/nginx/conf.d
-  links:
-    - php-fpm
-    - php-fpm-5.6
-
 php-fpm:
     container_name: fd_php-fpm
     build: ./php
@@ -21,8 +8,9 @@ php-fpm:
     restart: always
     links:
       - memcached
-    external_links:
-      - search
+      - redis
+    # external_links:
+    #   - search
 php-fpm-5.6:
     container_name: fd_php-fpm-5.6
     build: ./php-fpm-5.6
@@ -30,6 +18,21 @@ php-fpm-5.6:
       - D:/myproject/:/usr/share/nginx/html
     ports:
     - "9001:9000"
+    links:
+      - memcached
+      - redis
+nginx:
+    container_name: fd_nginx
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - D:/myproject/:/usr/share/nginx/html
+      - ./nginx/conf/conf.d:/etc/nginx/conf.d
+    links:
+      - php-fpm
+      - php-fpm-5.6
 memcached:
     container_name: fd_memcached
     build: ./memcached
@@ -38,3 +41,11 @@ memcached:
       - "11211:11211"
     environment:
       - MEMCACHED_CACHE_SIZE=128
+redis:
+    container_name: redis
+    build: ./redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command:
+      redis-server
