@@ -1,0 +1,114 @@
+set $nginx_cache_key '';
+# 如果是预览账号登录, 缓存页面不再缓存, 后端需要session_start
+set $no_nginx_cache no;
+if ($cookie_preview != '') {
+   set $no_nginx_cache yes;
+}
+add_header Nginx-Cache $upstream_cache_status;
+
+if ($nginx_cache_key = '') {
+    set $cache_disabled 1;
+}
+set $en_index '';
+if ($cookie_lang_code != '') {
+    set $en_index $cookie_lang_code;
+}
+set $cache_disabled 0;
+set $temp_en_index '';
+if ($uri ~* (/..)?) {
+    set $temp_en_index $1;
+}
+if ($temp_en_index != '') {
+    set $en_index $temp_en_index;
+}
+set $abTest 8;
+set $nginx_cache_key $scheme-$http_x_forwarded_proto://floryday-$host-$temp_cookie_country_code-$temp_cookie_currency-$cookie_not_header_tips-$cookie_not_pop-$cookie_abtest_assign-index-$is_args$en_index;
+
+# 如果分abtest 就不缓存
+if ($cookie_abtest_experiment_pc_productdetail_page = '') {
+        set $cache_disabled 1;
+}
+
+#90% 的流量到 spa
+set $ssr_from 0;
+set $ssr_to  9;
+#set_random $ssr_random $ssr_from $ssr_to;
+set $go_ssr  1;
+if ($ssr_random ~ [0-4]) {
+    set $go_ssr  2;
+}
+
+if ( $cookie_isssr = "1") {
+    set $go_ssr  1;
+}
+if ( $cookie_isssr = "2") {
+    set $go_ssr  2;
+}
+
+# 强制跳转 ssr
+if ( $arg_force_ssr = "1" ) {
+    set $go_ssr  1;
+}
+if ( $arg_force_ssr = "2" ) {
+    set $go_ssr  2;
+}
+add_header Set-Cookie "isssr=$go_ssr;domain=$host_main;Path=/;Max-Age=2592000";
+
+# 进行环境的切换
+set $h_env 1; # 为生产环境
+if ( $host ~* ^p.*) {
+    set $h_env 2; # 为预发布环境
+}
+if ( $host ~* ^ft.*) { #测试环境
+    set $h_env 3;
+}
+# H5首页的ab test 使用ssr 获取spa
+set $index_flag_h5_env $index_flag_h5$h_env$go_ssr;
+if ( $index_flag_h5_env = "${inABTestH5}2011" ){
+     proxy_pass              http://floryday_ssr_prod;
+ }
+if ( $index_flag_h5_env = "${inABTestH5}2021" ){
+     proxy_pass              http://floryday_ssr_pre;
+}
+if ( $index_flag_h5_env = "${inABTestH5}2031" ){
+     proxy_pass              http://floryday_ssr_test;
+}
+if ( $index_flag_h5_env = "${inABTestH5}2012" ){
+     proxy_pass              http://floryday_h5;
+ }
+if ( $index_flag_h5_env = "${inABTestH5}2022" ){
+     proxy_pass              http://floryday_h5;
+}
+if ( $index_flag_h5_env = "${inABTestH5}2032" ){
+     proxy_pass              http://floryday_h5;
+}
+if ( $index_flag_h5 != "${inABTestH5}20" ){
+    proxy_pass              http://floryday_backend;
+}
+
+add_header Env_Go $index_flag_h5_env;
+
+
+proxy_set_header     ngcountrycode $temp_cookie_country_code;
+proxy_set_header        ngcurrency      $temp_cookie_currency;
+proxy_set_header        needageargs $need_age_args;
+proxy_set_header        needuaaargs $need_uaa_args;
+proxy_set_header        lastage $last_age;
+set $cache_disabled 1;
+proxy_redirect          off;
+proxy_set_header        Host            $host;
+proxy_set_header        X-Port          $server_port;
+proxy_set_header        X-Real-IP       $remote_addr;
+proxy_set_header        NO-NGINX-CACHE  $no_nginx_cache;
+proxy_set_header        AB-TEST         $abTest;
+proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_ignore_client_abort on;
+proxy_next_upstream http_502 http_504 error timeout invalid_header;
+proxy_no_cache $cookie_preview $cache_disabled;
+proxy_cache_bypass $cookie_preview $cache_disabled;
+proxy_cache        cache_one;
+proxy_cache_valid  200 1h;
+proxy_cache_key    $nginx_cache_key;
+proxy_ignore_headers "Cache-Control" "Expires" "Set-Cookie";
+proxy_store off;
+break;

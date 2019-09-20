@@ -1,0 +1,221 @@
+    set $new_args_list $args;
+    set $cache_disabled 0;
+    set $from_ad 0;
+    set $uaa_local_type '';
+##  google 广告
+    if ($new_args_list ~*  (.*)(&utm_term[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+    if ($new_args_list ~*  ^(utm_term[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+    if ($new_args_list ~* (.*)(&atm_source[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+    if ($new_args_list ~* ^(atm_source[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&atm_medium[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+    if ($new_args_list ~* ^(atm_medium[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&atm_term[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+    if ($new_args_list ~* ^(atm_term[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&atm_content[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+    if ($new_args_list ~* ^(atm_content[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+    if ($new_args_list ~* (.*)(&atm_campaign[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+    if ($new_args_list ~* ^(atm_campaign[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&gclid[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* ^(gclid[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&epik[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* ^(epik[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&yclid[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* ^(yclid[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&fbclid[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* ^(fbclid[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&session_id[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* ^(session_id[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+##  facebook 广告[ newsletter  同 facebook 只是值不一样]
+    if ($new_args_list ~* (.*)(&utm_source[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+    if ($new_args_list ~* ^(utm_source[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&utm_medium[^&]*)(.*)) {
+		set $new_args_list  $1$3;
+		set $from_ad 1;
+    }
+
+    if ($new_args_list ~* ^(utm_medium[^&]*)(.*)) {
+    	set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&utm_content[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* ^(utm_content[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+    if ($new_args_list ~* (.*)(&utm_referrer[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* ^(utm_referrer[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+    if ($new_args_list ~* (.*)(&utm_expid[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* ^(utm_expid[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&utm_terd[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* ^(utm_terd[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&utm_key[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* ^(utm_key[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&utm_v[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* ^(utm_v[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&utm_identifier[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* ^(utm_identifier[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    if ($new_args_list ~* (.*)(&utm_campaign[^&]*)(.*)) {
+        set $new_args_list  $1$3;
+        set $from_ad 1;
+    }
+## newsletter 都是utm_campaign打头,没有&符号,最后再剔除
+    if ($new_args_list ~* ^(utm_campaign[^&]*)(.*)) {
+        set $new_args_list  $2;
+        set $from_ad 1;
+    }
+
+    set $en_index '';
+    if ($cookie_lang_code != '') {
+        set $en_index $cookie_lang_code;
+    }
+    set $temp_en_index '';
+    set $list_id_flag '';
+	if ($uri ~* ^(/..)?/[^\/]*-([cr])([0-9]+)(.*)$ ) {
+	    set $temp_en_index $1;
+		set $list_id_flag $2$3$4;
+        set $abTest 8;
+    }
+    if ($temp_en_index != '') {
+        set $en_index $temp_en_index;
+    }
+    if ($list_id_flag != '') {
+		set $nginx_cache_key  $scheme-$http_x_forwarded_proto://floryday-$host-$common_device-$temp_cookie_country_code-$last_age-$temp_cookie_currency-$cookie_not_header_tips-$cookie_not_pop-$cookie_abtest_assign-$abTest-list-$en_index-$list_id_flag-$new_args_list;
+    }

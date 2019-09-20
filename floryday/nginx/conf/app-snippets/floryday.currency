@@ -1,0 +1,2269 @@
+# depende on country get currency
+# part1 根据IP 获取国家 设置 货币
+set $nginx_geo_cid  '';
+set $nginx_geo_currency '';
+if ($geoip_country_code = 'AF') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'AL') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'DZ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'AD') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'AO') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'AI') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'AG') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'AR') {
+        set $nginx_geo_cid  15;
+}
+
+if ($geoip_country_code = 'AM') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'AW') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'AU') {
+        set $nginx_geo_cid  4;
+}
+
+if ($geoip_country_code = 'AT') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'AZ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'AZ') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'BS') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BH') {
+        set $nginx_geo_cid  20;
+}
+
+if ($geoip_country_code = 'BD') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BB') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BY') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BE') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'BZ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BJ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BM') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BT') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BO') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BQ') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'BA') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BW') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BR') {
+        set $nginx_geo_cid  14;
+}
+
+if ($geoip_country_code = 'BN') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BG') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BF') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BI') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'KH') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'CM') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'CA') {
+        set $nginx_geo_cid  3;
+}
+
+if ($geoip_country_code = 'IC') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'CV') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'KY') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'CF') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'TD') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'CL') {
+        set $nginx_geo_cid  16;
+}
+
+if ($geoip_country_code = 'CO') {
+        set $nginx_geo_cid  35;
+}
+
+if ($geoip_country_code = 'KM') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'CG') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'CD') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'CK') {
+        set $nginx_geo_cid  8;
+}
+
+if ($geoip_country_code = 'CR') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'CI') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'HR') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'CU') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'CW') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'CY') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'CZ') {
+        set $nginx_geo_cid  36;
+}
+
+if ($geoip_country_code = 'DK') {
+        set $nginx_geo_cid  12;
+}
+
+if ($geoip_country_code = 'DJ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'DM') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'DO') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'TL') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'EC') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'EG') {
+        set $nginx_geo_cid  42;
+}
+
+if ($geoip_country_code = 'SV') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'GQ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'ER') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'EE') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'ET') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'FK') {
+        set $nginx_geo_cid  6;
+}
+
+if ($geoip_country_code = 'FO') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'FJ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'FI') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'FR') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'GP') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'MQ') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'YT') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'RE') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'GF') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'PF') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'GA') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'GM') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'GE') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'DE') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'GH') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'GI') {
+        set $nginx_geo_cid  6;
+}
+
+if ($geoip_country_code = 'GR') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'GL') {
+        set $nginx_geo_cid  12;
+}
+
+if ($geoip_country_code = 'GD') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'GT') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'GG') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'GN') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'GW') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'GY') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'HT') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'CN') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'HN') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'HK') {
+        set $nginx_geo_cid  2;
+}
+
+if ($geoip_country_code = 'HU') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'IS') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'IN') {
+        set $nginx_geo_cid  47;
+}
+
+if ($geoip_country_code = 'ID') {
+        set $nginx_geo_cid  45;
+}
+
+if ($geoip_country_code = 'IR') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'IQ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'IE') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'IL') {
+        set $nginx_geo_cid  39;
+}
+
+if ($geoip_country_code = 'IT') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'JM') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'JP') {
+        set $nginx_geo_cid  25;
+}
+
+if ($geoip_country_code = 'JE') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'JO') {
+        set $nginx_geo_cid  40;
+}
+
+if ($geoip_country_code = 'KZ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'KE') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'KI') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'KP') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'KR') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'KO') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'KW') {
+        set $nginx_geo_cid  19;
+}
+
+if ($geoip_country_code = 'KG') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'LA') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'LV') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'LB') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'LS') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'LR') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'LI') {
+        set $nginx_geo_cid  9;
+}
+
+if ($geoip_country_code = 'LT') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'LU') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'MO') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'MK') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'MG') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'MW') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'MY') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'MV') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'ML') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'MT') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'MR') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'MU') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'MX') {
+        set $nginx_geo_cid  17;
+}
+
+if ($geoip_country_code = 'MD') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'MC') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'MN') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'ME') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'MS') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'MA') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'MZ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'MM') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'NA') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'NR') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'NP') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'NL') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'AN') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'NC') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'NZ') {
+        set $nginx_geo_cid  8;
+}
+
+if ($geoip_country_code = 'NI') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'NE') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'NG') {
+        set $nginx_geo_cid  37;
+}
+
+if ($geoip_country_code = 'NU') {
+        set $nginx_geo_cid  8;
+}
+
+if ($geoip_country_code = 'NO') {
+        set $nginx_geo_cid  11;
+}
+
+if ($geoip_country_code = 'OM') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'PK') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'PW') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'PS') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'PA') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'PG') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'PY') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'PE') {
+        set $nginx_geo_cid  48;
+}
+
+if ($geoip_country_code = 'PH') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'PL') {
+        set $nginx_geo_cid  24;
+}
+
+if ($geoip_country_code = 'PT') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'PR') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'QA') {
+        set $nginx_geo_cid  21;
+}
+
+if ($geoip_country_code = 'RO') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'RU') {
+        set $nginx_geo_cid  13;
+}
+
+if ($geoip_country_code = 'RW') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'KN') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'LC') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'MF') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'WS') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'SM') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'ST') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'SA') {
+        set $nginx_geo_cid  22;
+}
+
+if ($geoip_country_code = 'SN') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'RS') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'SC') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'SL') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'SG') {
+        set $nginx_geo_cid  18;
+}
+
+if ($geoip_country_code = 'SK') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'SI') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'SO') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'SO') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'ZA') {
+        set $nginx_geo_cid  38;
+}
+
+if ($geoip_country_code = 'SS') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'ES') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'LK') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'BL') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'SX') {
+        set $nginx_geo_cid  5;
+}
+
+if ($geoip_country_code = 'VC') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'SD') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'SR') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'SZ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'SE') {
+        set $nginx_geo_cid  10;
+}
+
+if ($geoip_country_code = 'CH') {
+        set $nginx_geo_cid  9;
+}
+
+if ($geoip_country_code = 'SY') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'TW') {
+        set $nginx_geo_cid  43;
+}
+
+if ($geoip_country_code = 'TJ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'TZ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'TH') {
+        set $nginx_geo_cid  46;
+}
+
+if ($geoip_country_code = 'TG') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'TO') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'TT') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'TN') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'TR') {
+        set $nginx_geo_cid  44;
+}
+
+if ($geoip_country_code = 'TM') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'TC') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'TV') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'GU') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'UG') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'UA') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'AE') {
+        set $nginx_geo_cid  23;
+}
+
+if ($geoip_country_code = 'GB') {
+        set $nginx_geo_cid  6;
+}
+
+if ($geoip_country_code = 'US') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'UY') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'UZ') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'VU') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'VE') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'VN') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'VG') {
+        set $nginx_geo_cid  6;
+}
+
+if ($geoip_country_code = 'VI') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'WF') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'YE') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'YU') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'ZM') {
+        set $nginx_geo_cid  1;
+}
+
+if ($geoip_country_code = 'ZW') {
+        set $nginx_geo_cid  1;
+}
+
+if ($nginx_geo_cid = 1) {
+        set $nginx_geo_currency  'USD';
+}
+
+if ($nginx_geo_cid = 2) {
+        set $nginx_geo_currency  'HKD';
+}
+
+if ($nginx_geo_cid = 3) {
+        set $nginx_geo_currency  'CAD';
+}
+
+if ($nginx_geo_cid = 4) {
+        set $nginx_geo_currency  'AUD';
+}
+
+if ($nginx_geo_cid = 5) {
+        set $nginx_geo_currency  'EUR';
+}
+
+if ($nginx_geo_cid = 6) {
+        set $nginx_geo_currency  'GBP';
+}
+
+if ($nginx_geo_cid = 7) {
+        set $nginx_geo_currency  'CNY';
+}
+
+if ($nginx_geo_cid = 8) {
+        set $nginx_geo_currency  'NZD';
+}
+
+if ($nginx_geo_cid = 9) {
+        set $nginx_geo_currency  'CHF';
+}
+
+if ($nginx_geo_cid = 10) {
+        set $nginx_geo_currency  'SEK';
+}
+
+if ($nginx_geo_cid = 11) {
+        set $nginx_geo_currency  'NOK';
+}
+
+if ($nginx_geo_cid = 12) {
+        set $nginx_geo_currency  'DKK';
+}
+
+if ($nginx_geo_cid = 13) {
+        set $nginx_geo_currency  'RUB';
+}
+
+if ($nginx_geo_cid = 14) {
+        set $nginx_geo_currency  'BRL';
+}
+
+if ($nginx_geo_cid = 15) {
+        set $nginx_geo_currency  'ARS';
+}
+
+if ($nginx_geo_cid = 16) {
+        set $nginx_geo_currency  'CLP';
+}
+
+if ($nginx_geo_cid = 17) {
+        set $nginx_geo_currency  'MXN';
+}
+
+if ($nginx_geo_cid = 18) {
+        set $nginx_geo_currency  'SGD';
+}
+
+if ($nginx_geo_cid = 19) {
+        set $nginx_geo_currency  'KWD';
+}
+
+if ($nginx_geo_cid = 20) {
+        set $nginx_geo_currency  'BHD';
+}
+
+if ($nginx_geo_cid = 21) {
+        set $nginx_geo_currency  'QAR';
+}
+
+if ($nginx_geo_cid = 22) {
+        set $nginx_geo_currency  'SAR';
+}
+
+if ($nginx_geo_cid = 23) {
+        set $nginx_geo_currency  'AED';
+}
+
+if ($nginx_geo_cid = 24) {
+        set $nginx_geo_currency  'PLN';
+}
+
+if ($nginx_geo_cid = 25) {
+        set $nginx_geo_currency  'JPY';
+}
+
+if ($nginx_geo_cid = 35) {
+        set $nginx_geo_currency  'COP';
+}
+
+if ($nginx_geo_cid = 36) {
+        set $nginx_geo_currency  'CZK';
+}
+
+if ($nginx_geo_cid = 37) {
+        set $nginx_geo_currency  'NGN';
+}
+
+if ($nginx_geo_cid = 38) {
+        set $nginx_geo_currency  'ZAR';
+}
+
+if ($nginx_geo_cid = 39) {
+        set $nginx_geo_currency  'ILS';
+}
+
+if ($nginx_geo_cid = 40) {
+        set $nginx_geo_currency  'JOD';
+}
+
+if ($nginx_geo_cid = 42) {
+        set $nginx_geo_currency  'EGP';
+}
+
+if ($nginx_geo_cid = 43) {
+        set $nginx_geo_currency  'TWD';
+}
+
+if ($nginx_geo_cid = 44) {
+        set $nginx_geo_currency  'TRY';
+}
+
+if ($nginx_geo_cid = 45) {
+        set $nginx_geo_currency  'IDR';
+}
+
+if ($nginx_geo_cid = 46) {
+        set $nginx_geo_currency  'THB';
+}
+
+if ($nginx_geo_cid = 47) {
+        set $nginx_geo_currency  'INR';
+}
+
+if ($nginx_geo_cid = 48) {
+        set $nginx_geo_currency  'PEN';
+}
+
+# part2 如果有国家参数 根据参数选定 货币
+set $nginx_country_arg_cid '';
+set $nginx_country_arg_currency '';
+if ($arg_country_code = 'AF') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'AL') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'DZ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'AD') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'AO') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'AI') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'AG') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'AR') {
+        set $nginx_country_arg_cid  15;
+}
+
+if ($arg_country_code = 'AM') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'AW') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'AU') {
+        set $nginx_country_arg_cid  4;
+}
+
+if ($arg_country_code = 'AT') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'AZ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'AZ') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'BS') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BH') {
+        set $nginx_country_arg_cid  20;
+}
+
+if ($arg_country_code = 'BD') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BB') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BY') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BE') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'BZ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BJ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BM') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BT') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BO') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BQ') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'BA') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BW') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BR') {
+        set $nginx_country_arg_cid  14;
+}
+
+if ($arg_country_code = 'BN') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BG') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BF') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BI') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'KH') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'CM') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'CA') {
+        set $nginx_country_arg_cid  3;
+}
+
+if ($arg_country_code = 'IC') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'CV') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'KY') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'CF') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'TD') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'CL') {
+        set $nginx_country_arg_cid  16;
+}
+
+if ($arg_country_code = 'CO') {
+        set $nginx_country_arg_cid  35;
+}
+
+if ($arg_country_code = 'KM') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'CG') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'CD') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'CK') {
+        set $nginx_country_arg_cid  8;
+}
+
+if ($arg_country_code = 'CR') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'CI') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'HR') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'CU') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'CW') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'CY') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'CZ') {
+        set $nginx_country_arg_cid  36;
+}
+
+if ($arg_country_code = 'DK') {
+        set $nginx_country_arg_cid  12;
+}
+
+if ($arg_country_code = 'DJ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'DM') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'DO') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'TL') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'EC') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'EG') {
+        set $nginx_country_arg_cid  42;
+}
+
+if ($arg_country_code = 'SV') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'GQ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'ER') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'EE') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'ET') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'FK') {
+        set $nginx_country_arg_cid  6;
+}
+
+if ($arg_country_code = 'FO') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'FJ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'FI') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'FR') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'GP') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'MQ') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'YT') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'RE') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'GF') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'PF') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'GA') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'GM') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'GE') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'DE') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'GH') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'GI') {
+        set $nginx_country_arg_cid  6;
+}
+
+if ($arg_country_code = 'GR') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'GL') {
+        set $nginx_country_arg_cid  12;
+}
+
+if ($arg_country_code = 'GD') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'GT') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'GG') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'GN') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'GW') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'GY') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'HT') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'CN') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'HN') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'HK') {
+        set $nginx_country_arg_cid  2;
+}
+
+if ($arg_country_code = 'HU') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'IS') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'IN') {
+        set $nginx_country_arg_cid  47;
+}
+
+if ($arg_country_code = 'ID') {
+        set $nginx_country_arg_cid  45;
+}
+
+if ($arg_country_code = 'IR') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'IQ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'IE') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'IL') {
+        set $nginx_country_arg_cid  39;
+}
+
+if ($arg_country_code = 'IT') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'JM') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'JP') {
+        set $nginx_country_arg_cid  25;
+}
+
+if ($arg_country_code = 'JE') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'JO') {
+        set $nginx_country_arg_cid  40;
+}
+
+if ($arg_country_code = 'KZ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'KE') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'KI') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'KP') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'KR') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'KO') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'KW') {
+        set $nginx_country_arg_cid  19;
+}
+
+if ($arg_country_code = 'KG') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'LA') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'LV') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'LB') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'LS') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'LR') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'LI') {
+        set $nginx_country_arg_cid  9;
+}
+
+if ($arg_country_code = 'LT') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'LU') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'MO') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'MK') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'MG') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'MW') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'MY') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'MV') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'ML') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'MT') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'MR') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'MU') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'MX') {
+        set $nginx_country_arg_cid  17;
+}
+
+if ($arg_country_code = 'MD') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'MC') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'MN') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'ME') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'MS') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'MA') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'MZ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'MM') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'NA') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'NR') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'NP') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'NL') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'AN') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'NC') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'NZ') {
+        set $nginx_country_arg_cid  8;
+}
+
+if ($arg_country_code = 'NI') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'NE') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'NG') {
+        set $nginx_country_arg_cid  37;
+}
+
+if ($arg_country_code = 'NU') {
+        set $nginx_country_arg_cid  8;
+}
+
+if ($arg_country_code = 'NO') {
+        set $nginx_country_arg_cid  11;
+}
+
+if ($arg_country_code = 'OM') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'PK') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'PW') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'PS') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'PA') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'PG') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'PY') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'PE') {
+        set $nginx_country_arg_cid  48;
+}
+
+if ($arg_country_code = 'PH') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'PL') {
+        set $nginx_country_arg_cid  24;
+}
+
+if ($arg_country_code = 'PT') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'PR') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'QA') {
+        set $nginx_country_arg_cid  21;
+}
+
+if ($arg_country_code = 'RO') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'RU') {
+        set $nginx_country_arg_cid  13;
+}
+
+if ($arg_country_code = 'RW') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'KN') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'LC') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'MF') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'WS') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'SM') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'ST') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'SA') {
+        set $nginx_country_arg_cid  22;
+}
+
+if ($arg_country_code = 'SN') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'RS') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'SC') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'SL') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'SG') {
+        set $nginx_country_arg_cid  18;
+}
+
+if ($arg_country_code = 'SK') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'SI') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'SO') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'SO') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'ZA') {
+        set $nginx_country_arg_cid  38;
+}
+
+if ($arg_country_code = 'SS') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'ES') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'LK') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'BL') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'SX') {
+        set $nginx_country_arg_cid  5;
+}
+
+if ($arg_country_code = 'VC') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'SD') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'SR') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'SZ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'SE') {
+        set $nginx_country_arg_cid  10;
+}
+
+if ($arg_country_code = 'CH') {
+        set $nginx_country_arg_cid  9;
+}
+
+if ($arg_country_code = 'SY') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'TW') {
+        set $nginx_country_arg_cid  43;
+}
+
+if ($arg_country_code = 'TJ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'TZ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'TH') {
+        set $nginx_country_arg_cid  46;
+}
+
+if ($arg_country_code = 'TG') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'TO') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'TT') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'TN') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'TR') {
+        set $nginx_country_arg_cid  44;
+}
+
+if ($arg_country_code = 'TM') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'TC') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'TV') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'GU') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'UG') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'UA') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'AE') {
+        set $nginx_country_arg_cid  23;
+}
+
+if ($arg_country_code = 'GB') {
+        set $nginx_country_arg_cid  6;
+}
+
+if ($arg_country_code = 'US') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'UY') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'UZ') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'VU') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'VE') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'VN') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'VG') {
+        set $nginx_country_arg_cid  6;
+}
+
+if ($arg_country_code = 'VI') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'WF') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'YE') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'YU') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'ZM') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($arg_country_code = 'ZW') {
+        set $nginx_country_arg_cid  1;
+}
+
+if ($nginx_country_arg_cid = 1) {
+        set $nginx_country_arg_currency  'USD';
+}
+
+if ($nginx_country_arg_cid = 2) {
+        set $nginx_country_arg_currency  'HKD';
+}
+
+if ($nginx_country_arg_cid = 3) {
+        set $nginx_country_arg_currency  'CAD';
+}
+
+if ($nginx_country_arg_cid = 4) {
+        set $nginx_country_arg_currency  'AUD';
+}
+
+if ($nginx_country_arg_cid = 5) {
+        set $nginx_country_arg_currency  'EUR';
+}
+
+if ($nginx_country_arg_cid = 6) {
+        set $nginx_country_arg_currency  'GBP';
+}
+
+if ($nginx_country_arg_cid = 7) {
+        set $nginx_country_arg_currency  'CNY';
+}
+
+if ($nginx_country_arg_cid = 8) {
+        set $nginx_country_arg_currency  'NZD';
+}
+
+if ($nginx_country_arg_cid = 9) {
+        set $nginx_country_arg_currency  'CHF';
+}
+
+if ($nginx_country_arg_cid = 10) {
+        set $nginx_country_arg_currency  'SEK';
+}
+
+if ($nginx_country_arg_cid = 11) {
+        set $nginx_country_arg_currency  'NOK';
+}
+
+if ($nginx_country_arg_cid = 12) {
+        set $nginx_country_arg_currency  'DKK';
+}
+
+if ($nginx_country_arg_cid = 13) {
+        set $nginx_country_arg_currency  'RUB';
+}
+
+if ($nginx_country_arg_cid = 14) {
+        set $nginx_country_arg_currency  'BRL';
+}
+
+if ($nginx_country_arg_cid = 15) {
+        set $nginx_country_arg_currency  'ARS';
+}
+
+if ($nginx_country_arg_cid = 16) {
+        set $nginx_country_arg_currency  'CLP';
+}
+
+if ($nginx_country_arg_cid = 17) {
+        set $nginx_country_arg_currency  'MXN';
+}
+
+if ($nginx_country_arg_cid = 18) {
+        set $nginx_country_arg_currency  'SGD';
+}
+
+if ($nginx_country_arg_cid = 19) {
+        set $nginx_country_arg_currency  'KWD';
+}
+
+if ($nginx_country_arg_cid = 20) {
+        set $nginx_country_arg_currency  'BHD';
+}
+
+if ($nginx_country_arg_cid = 21) {
+        set $nginx_country_arg_currency  'QAR';
+}
+
+if ($nginx_country_arg_cid = 22) {
+        set $nginx_country_arg_currency  'SAR';
+}
+
+if ($nginx_country_arg_cid = 23) {
+        set $nginx_country_arg_currency  'AED';
+}
+
+if ($nginx_country_arg_cid = 24) {
+        set $nginx_country_arg_currency  'PLN';
+}
+
+if ($nginx_country_arg_cid = 25) {
+        set $nginx_country_arg_currency  'JPY';
+}
+
+if ($nginx_country_arg_cid = 35) {
+        set $nginx_country_arg_currency  'COP';
+}
+
+if ($nginx_country_arg_cid = 36) {
+        set $nginx_country_arg_currency  'CZK';
+}
+
+if ($nginx_country_arg_cid = 37) {
+        set $nginx_country_arg_currency  'NGN';
+}
+
+if ($nginx_country_arg_cid = 38) {
+        set $nginx_country_arg_currency  'ZAR';
+}
+
+if ($nginx_country_arg_cid = 39) {
+        set $nginx_country_arg_currency  'ILS';
+}
+
+if ($nginx_country_arg_cid = 40) {
+        set $nginx_country_arg_currency  'JOD';
+}
+
+if ($nginx_country_arg_cid = 42) {
+        set $nginx_country_arg_currency  'EGP';
+}
+
+if ($nginx_country_arg_cid = 43) {
+        set $nginx_country_arg_currency  'TWD';
+}
+
+if ($nginx_country_arg_cid = 44) {
+        set $nginx_country_arg_currency  'TRY';
+}
+
+if ($nginx_country_arg_cid = 45) {
+        set $nginx_country_arg_currency  'IDR';
+}
+
+if ($nginx_country_arg_cid = 46) {
+        set $nginx_country_arg_currency  'THB';
+}
+
+if ($nginx_country_arg_cid = 47) {
+        set $nginx_country_arg_currency  'INR';
+}
+
+if ($nginx_country_arg_cid = 48) {
+        set $nginx_country_arg_currency  'PEN';
+}
+
+
+
+# part3 如果有货币参数,用传过来的参数
+set  $nginx_arg_cid  '';
+if ($arg_currency = 'USD') {
+    set $nginx_arg_cid 1;
+}
+if ($arg_currency = 'HKD') {
+    set $nginx_arg_cid 2;
+}
+if ($arg_currency = 'CAD') {
+    set $nginx_arg_cid 3;
+}
+if ($arg_currency = 'AUD') {
+    set $nginx_arg_cid 4;
+}
+if ($arg_currency = 'EUR') {
+    set $nginx_arg_cid 5;
+}
+if ($arg_currency = 'GBP') {
+    set $nginx_arg_cid 6;
+}
+if ($arg_currency = 'CNY') {
+    set $nginx_arg_cid 7;
+}
+if ($arg_currency = 'NZD') {
+    set $nginx_arg_cid 8;
+}
+if ($arg_currency = 'CHF') {
+    set $nginx_arg_cid 9;
+}
+if ($arg_currency = 'SEK') {
+    set $nginx_arg_cid 10;
+}
+if ($arg_currency = 'NOK') {
+    set $nginx_arg_cid 11;
+}
+if ($arg_currency = 'DKK') {
+    set $nginx_arg_cid 12;
+}
+if ($arg_currency = 'RUB') {
+    set $nginx_arg_cid 13;
+}
+if ($arg_currency = 'BRL') {
+    set $nginx_arg_cid 14;
+}
+if ($arg_currency = 'ARS') {
+    set $nginx_arg_cid 15;
+}
+if ($arg_currency = 'CLP') {
+    set $nginx_arg_cid 16;
+}
+if ($arg_currency = 'MXN') {
+    set $nginx_arg_cid 17;
+}
+if ($arg_currency = 'SGD') {
+    set $nginx_arg_cid 18;
+}
+if ($arg_currency = 'KWD') {
+    set $nginx_arg_cid 19;
+}
+if ($arg_currency = 'BHD') {
+    set $nginx_arg_cid 20;
+}
+if ($arg_currency = 'QAR') {
+    set $nginx_arg_cid 21;
+}
+if ($arg_currency = 'SAR') {
+    set $nginx_arg_cid 22;
+}
+if ($arg_currency = 'AED') {
+    set $nginx_arg_cid 23;
+}
+if ($arg_currency = 'PLN') {
+    set $nginx_arg_cid 24;
+}
+if ($arg_currency = 'JPY') {
+    set $nginx_arg_cid 25;
+}
+if ($arg_currency = 'COP') {
+    set $nginx_arg_cid 35;
+}
+if ($arg_currency = 'CZK') {
+    set $nginx_arg_cid 36;
+}
+if ($arg_currency = 'NGN') {
+    set $nginx_arg_cid 37;
+}
+if ($arg_currency = 'ZAR') {
+    set $nginx_arg_cid 38;
+}
+if ($arg_currency = 'ILS') {
+    set $nginx_arg_cid 39;
+}
+if ($arg_currency = 'JOD') {
+    set $nginx_arg_cid 40;
+}
+if ($arg_currency = 'EGP') {
+    set $nginx_arg_cid 42;
+}
+if ($arg_currency = 'TWD') {
+    set $nginx_arg_cid 43;
+}
+if ($arg_currency = 'TRY') {
+    set $nginx_arg_cid 44;
+}
+if ($arg_currency = 'IDR') {
+    set $nginx_arg_cid 45;
+}
+if ($arg_currency = 'THB') {
+    set $nginx_arg_cid 46;
+}
+if ($arg_currency = 'INR') {
+    set $nginx_arg_cid 47;
+}
+if ($arg_currency = 'PEN') {
+    set $nginx_arg_cid 48;
+}

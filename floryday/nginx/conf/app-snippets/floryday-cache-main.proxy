@@ -1,0 +1,572 @@
+set $index_flag "";
+set $index_dir "${prjroot}/src/php/webapp";
+if ( $common_device = 3 ){
+    set $index_flag 1;
+}
+if ( $common_device = 2 ){
+    set $index_flag 2;
+}
+if ( $common_device = 1 ){
+    set $index_flag 1;
+    set $index_dir "${prjroot}/src/php/webapp";
+}
+set $inABTestH5 7;
+#列表详情页abtest
+    set $inABTestListH5 1;
+#爬虫不走H5页面
+    set $is_spider 0;
+    if ($http_user_agent ~* "spider|bot") {
+       set $is_spider 1;
+    }
+
+    set $temp_cookie_country_code $cookie_country_code;
+#根据IP 获取国家
+    set $host_main  $host;
+    if ( $host ~* ^\.?([A-Za-z]+\-?[A-Za-z]?[0-9]?)(\.[A-Za-z]+\.[A-Za-z]+)) {
+        set $host_main  $2;
+    }
+
+    if ($cookie_country_code = '') {
+        set $temp_cookie_country_code $geoip_country_code;
+    }
+#如果有参数,优先参数
+    if ($arg_country_code != '') {
+        set $temp_cookie_country_code $arg_country_code;
+    }
+    if ($temp_cookie_country_code = '') {
+        set $temp_cookie_country_code 'US';
+    }
+    #重定向不存cookie，且重复不设置相同的cookie
+    set $temp_country_code_head "";
+    set $set_country_code_cookie  0;
+    if ($is_redirect = 0) {
+        set $set_country_code_cookie 1;
+    }
+    if ($temp_cookie_country_code != "$cookie_country_code") {
+         set $set_country_code_cookie 1$set_country_code_cookie;
+    }
+    if ($set_country_code_cookie = 11) {
+        set $temp_country_code_head "country_code=$temp_cookie_country_code;domain=$host_main;Path=/;Max-Age=2592000";
+    }
+    add_header Set-Cookie "$temp_country_code_head";
+    
+    #重定向不存cookie，且重复不设置相同的cookie
+    set $temp_abTestH5_head "";
+    set $set_abTestH5_cookie 0;
+    if ($is_redirect = 0){
+        set $set_abTestH5_cookie 1;
+    }
+    if ($cookie_abTestH5 != 7) {
+         set $set_abTestH5_cookie 1$set_abTestH5_cookie;
+    }
+    if ($set_abTestH5_cookie = 11) {
+        set $temp_abTestH5_head "abTestH5=7;domain=$host;Path=/;Max-Age=2592000";
+    }
+    add_header Set-Cookie "$temp_abTestH5_head";
+
+    set $abTestListH5 2;
+    if ( $cookie_abTestListH5 != '' ){
+        set $abTestListH5  $cookie_abTestListH5;
+    }
+    set $index_flag_h5 "${inABTestH5}${index_flag}${is_spider}";
+    set $list_flag_h5 "${abTestListH5}${index_flag}${is_spider}";
+
+#根据IP得到国家,获取货币,设置货币
+    set $temp_cookie_currency $cookie_currency;
+
+    set $use_nginx_geo_cid 0;
+    if ($cookie_currency = '') {
+        set $use_nginx_geo_cid 1;
+    }
+    if ($nginx_geo_currency != '') {
+        set $use_nginx_geo_cid 1$use_nginx_geo_cid;
+    }
+    if ($use_nginx_geo_cid = 11) {
+        set $temp_cookie_currency $nginx_geo_currency;
+    }
+
+#根据国家参数, 获取货币,设置货币,[注意, 如果是用户设置过货币, 则不能有此关联]
+    set $use_country_arg_cid 0;
+    if ($cookie_cid_sbu = '') {
+        set $use_country_arg_cid 1;
+    }
+    if ($nginx_country_arg_currency != '') {
+        set $use_country_arg_cid 1$use_country_arg_cid;
+    }
+    if ($use_country_arg_cid = 11) {
+        set $temp_cookie_currency $nginx_country_arg_currency;
+    }
+
+    #根据用户选择货币参数 ,设置货币
+    set $tmp_cid_sbu $cookie_cid_sbu;
+    if ($arg_currency != '') {
+        set $temp_cookie_currency $arg_currency;
+        set $tmp_cid_sbu 1;
+    }
+    #默认取USD
+    if ($temp_cookie_currency = ''){
+        set $temp_cookie_currency 'USD';
+    }
+
+    set $temp_currency_head "";
+    set $set_currency_cookie 0;
+    if ($is_redirect = 0){
+        set $set_currency_cookie 1;
+    }
+    if ($temp_cookie_currency != "$cookie_currency") {
+         set $set_currency_cookie 1$set_currency_cookie;
+    }
+    if ($set_currency_cookie = 11) {
+        set $temp_currency_head "currency=$temp_cookie_currency;domain=$host_main;Path=/;Max-Age=2592000";
+    }
+    add_header Set-Cookie "$temp_currency_head";
+
+    set $temp_cid_sbu_head "";
+    set $set_cid_sbu_cookie 0;
+    if ($is_redirect = 0){
+        set $set_cid_sbu_cookie 1;
+    }
+    if ($tmp_cid_sbu != "$cookie_cid_sbu") {
+         set $set_cid_sbu_cookie 1$set_cid_sbu_cookie;
+    }
+    if ($set_cid_sbu_cookie = 11) {
+        set $temp_cid_sbu_head "cid_sbu=$tmp_cid_sbu;domain=$host_main;Path=/;Max-Age=2592000";
+    }
+    add_header Set-Cookie "$temp_currency_head";
+    add_header Set-Cookie "$temp_cid_sbu_head";
+
+#新的H5链接中的普通列表页和详情页
+location ~* ((/..)?/list\/(.*)|(/..)?/product\/(.*)|(/..)?/cart$|(/..)?/sale\/|(/..)?/preOrder$) {
+         set $need_uaa_args '';
+            set $need_age_args '';
+            set $last_age 0;
+            #  广告 用户年龄段存储
+            if ($cookie_uaa_local_type != '') {
+                set $last_age $cookie_uaa_local_type;
+            }
+
+            if ($cookie_uaa_type  ~ [1-9]) {
+                set $need_uaa_args $cookie_uaa_type;
+                set $last_age $cookie_uaa_type;
+            }
+
+            if ($cookie_age_group  ~ [1-9]) {
+                set $need_age_args $cookie_age_group;
+                set $last_age $cookie_age_group;
+            }
+
+            if ($arg_age_group ~ [1-9]) {
+                set $need_age_args  $arg_age_group;
+                set $need_uaa_args  $arg_age_group;
+                set $last_age $arg_age_group;
+            }
+            set $h_env 1; # 为生产环境
+            if ( $host ~* ^p.*) {
+                set $h_env 2; # 为预发布环境
+            }
+            if ( $host ~* ^ft.*) { #测试环境
+                set $h_env 3;
+            }
+            #90% 的流量到 spa
+            set $ssr_from 0;
+            set $ssr_to  9;
+            #set_random $ssr_random $ssr_from $ssr_to;
+            set $go_ssr  1;
+            if ($ssr_random ~ [0-4] ) {
+                set $go_ssr  2;
+            }
+            if ( $cookie_isssr = "1") {
+                set $go_ssr  1;
+            }
+            if ( $cookie_isssr = "2") {
+                set $go_ssr  2;
+            }
+            if ( $arg_force_ssr = "1" ) {
+                set $go_ssr  1;
+            }
+            if ( $arg_force_ssr = "2" ) {
+                set $go_ssr  2;
+            }
+            rewrite ^(/..)+/product\/(.*)/2$ $1/product\/$2 redirect;
+            rewrite ^/product\/(.*)/2$ en/product\/$1 redirect;
+
+            add_header Set-Cookie "isssr=$go_ssr;domain=$host_main;Path=/;Max-Age=2592000";
+
+            add_header Set-Cookie "age_group=$need_age_args;domain=$host_main;Path=/;Max-Age=2592000";
+            add_header Set-Cookie "uaa_type=$need_uaa_args;domain=$host_main;Path=/;Max-Age=2592000";
+            add_header Set-Cookie "$temp_cid_sbu_head";
+            add_header Set-Cookie "$temp_currency_head";
+            add_header Set-Cookie "$temp_country_code_head";
+            set $h_env_ssr $h_env$go_ssr;
+            add_header Env_Go_New_list $h_env_ssr;
+            proxy_set_header        ngcountrycode $temp_cookie_country_code;
+            proxy_set_header        ngcurrency      $temp_cookie_currency;
+            proxy_set_header        needageargs $need_age_args;
+            proxy_set_header        needuaaargs $need_uaa_args;
+            proxy_set_header        lastage $last_age;
+            proxy_redirect          off;
+            proxy_set_header        Host            $host;
+            proxy_set_header        X-Port          $server_port;
+            proxy_set_header        X-Real-IP       $remote_addr;
+            proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_ignore_client_abort on;
+            proxy_next_upstream http_502 http_504 http_500 error timeout invalid_header;
+            #如果是web的flush sale
+            set $page_is_sale 0;
+            if ( $uri ~* (/..)?/sale\/ ) {
+                set $page_is_sale 1;
+            }
+            set $web_sale $index_flag$page_is_sale;
+            if ($web_sale = 11) {
+                        proxy_pass              http://floryday_backend;
+                        break;
+            }
+            if ( $h_env_ssr = 11){
+                        rewrite ^(/..)+\/sale\/?$ $1/sale/ALL redirect;
+                        rewrite \/(sale)\/?$ /en/sale/ALL redirect;
+                        proxy_pass              http://floryday_ssr_prod;
+                        break;
+            }
+            if ( $h_env_ssr = 21){
+                        rewrite ^(/..)+\/sale\/?$ $1/sale/ALL redirect;
+                        rewrite \/(sale)\/?$ /en/sale/ALL redirect;
+                        proxy_pass              http://floryday_ssr_pre;
+                                    break;
+            }
+            if ( $h_env_ssr = 31){
+                        rewrite ^(/..)+\/sale\/?$ $1/sale/ALL redirect;
+                        rewrite \/(sale)\/?$ /en/sale/ALL redirect;
+                        proxy_pass              http://floryday_ssr_test;
+                                    break;
+            }
+            if ($go_ssr = 2){
+                        rewrite ^(/..)+\/(sale)(.*)$ $1/flashSale/ALL?currentRouteSn=ALL redirect;
+                        rewrite \/(sale)(.*)$ /en/flashSale/ALL?currentRouteSn=ALL redirect;
+                        proxy_pass              http://floryday_h5;
+                                    break;
+            }
+            proxy_pass              http://floryday_ssr_prod;
+            break;
+}
+
+#新H5的链接必进新H5页面
+location ~* ^((/..)?/flashSale\/(.*)|(/..)?/preguide\/?|(/..)?/payment/([0-9]+)|(/..)?/size-chart)$ {
+     set $need_uaa_args '';
+        set $need_age_args '';
+        set $last_age 0;
+        #  广告 用户年龄段存储
+        if ($cookie_uaa_local_type != '') {
+            set $last_age $cookie_uaa_local_type;
+        }
+
+        if ($cookie_uaa_type  ~ [1-9]) {
+            set $need_uaa_args $cookie_uaa_type;
+            set $last_age $cookie_uaa_type;
+        }
+
+        if ($cookie_age_group  ~ [1-9]) {
+            set $need_age_args $cookie_age_group;
+            set $last_age $cookie_age_group;
+        }
+
+        if ($arg_age_group ~ [1-9]) {
+            set $need_age_args  $arg_age_group;
+            set $need_uaa_args  $arg_age_group;
+            set $last_age $arg_age_group;
+        }
+        add_header Set-Cookie "age_group=$need_age_args;domain=$host_main;Path=/;Max-Age=2592000";
+        add_header Set-Cookie "uaa_type=$need_uaa_args;domain=$host_main;Path=/;Max-Age=2592000";
+        add_header Set-Cookie "$temp_cid_sbu_head";
+        add_header Set-Cookie "$temp_currency_head";
+        add_header Set-Cookie "$temp_country_code_head";
+        proxy_pass              http://floryday_h5;
+        proxy_redirect          off;
+        proxy_set_header        Host            $host;
+        proxy_set_header        X-Port          $server_port;
+        proxy_set_header        X-Real-IP       $remote_addr;
+        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_ignore_client_abort on;
+        proxy_next_upstream http_502 http_504 http_500 error timeout invalid_header;
+        break;
+}
+
+location ~* ^(/|/de|/en|/es|/fr|/se|/no|/it|/pt|/da|/fi|/ru|/nl|/ar|/cs|/he|/pl|/sk|/tr|/id|/th|/tw|/de/|/en/|/es/|/fr/|/se/|/no/|/it/|/pt/|/da/|/fi/|/ru/|/nl/|/ar/|/cs/|/he/|/pl/|/sk/|/tr/|/id/|/th/|/tw/)$ {
+    add_header Set-Cookie "$temp_cid_sbu_head";
+    add_header Set-Cookie "$temp_currency_head";
+    add_header Set-Cookie "$temp_country_code_head";
+    include app-snippets/floryday-index-rule.proxy;
+}
+
+location ~* ^((/..)?/checkout.php|(/..)?/credit_card.php|(/..)?/checkout_success.php)$ {
+        add_header Set-Cookie "$temp_cid_sbu_head";
+        add_header Set-Cookie "$temp_currency_head";
+        add_header Set-Cookie "$temp_country_code_head";
+        #获取旧H5跳新H5页面的参数
+        set $come_from 1;
+        if ($arg_come_from != '') {
+            set $come_from $arg_come_from;
+        }
+        set $pay_now "";
+        if ($arg_act = "pay_now") {
+            set $pay_now 1;
+        }
+        # H5的ab test
+        set $in_new_pay 0;
+        if ( $list_flag_h5 = "${inABTestListH5}20" ) {
+            set $in_new_pay 1;
+        }
+
+        if ( $in_new_pay = 1 ) {
+            rewrite ^(/..)+/checkout\.php$ $1/payment/$come_from?order_sn=$arg_pre_order_sn&pay_now=$pay_now redirect;
+            rewrite \/checkout\.php$ /en/payment/$come_from?order_sn=$arg_pre_order_sn&pay_now=$pay_now redirect;
+            rewrite ^(/..)+/credit_card\.php$ $1/payment/1 redirect;
+            rewrite \/credit_card\.php$ /en/payment/1 redirect;
+            rewrite ^(/..)+/checkout_success\.php $1/payment/1 redirect;
+            rewrite \/checkout_success\.php$ /en/payment/1 redirect;
+            proxy_pass              http://floryday_h5;
+            break;
+        }
+        if ( $in_new_pay != 1) {
+           proxy_pass              http://floryday_backend;
+        }
+
+        set $cache_disabled 1;
+        proxy_redirect          off;
+        proxy_set_header        Host            $host;
+        proxy_set_header        X-Port          $server_port;
+        proxy_set_header        X-Real-IP       $remote_addr;
+        proxy_set_header        NO-NGINX-CACHE  $no_nginx_cache;
+        proxy_set_header        AB-TEST         $abTest;
+        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_ignore_client_abort on;
+        proxy_next_upstream http_502 http_504 error timeout invalid_header;
+        proxy_no_cache $cookie_preview $cache_disabled;
+        proxy_cache_bypass $cookie_preview $cache_disabled;
+        proxy_cache        cache_one;
+        proxy_cache_valid  200 1h;
+    #       proxy_cache_valid  301 302 1h;
+    #       proxy_cache_valid  any 1m;
+        proxy_cache_key    $nginx_cache_key;
+        proxy_ignore_headers "Cache-Control" "Expires" "Set-Cookie";
+        proxy_store off;
+        break;
+}
+
+## 普通列表页和详情页 转到ssr
+location ~* ^((/..)?/[^\/]*-r([0-9]+)(.*)|(/..)?/[^\/]*-m([0-9]+)\/?|(/..)?/cart.php)$ {
+
+    #处理新版H5 reorder功能
+    set $reorder "";
+    if ($uri ~* (/cart.php)?) {
+        set $reorder 1;
+    }
+    if ($arg_reorder = 1) {
+        set $reorder 1$reorder;
+    }
+    if ($arg_order_sn != '') {
+        set $reorder 1$reorder;
+    }
+    if ($reorder = '111' ) {
+        set $list_flag_h5  2;
+    }
+    set $need_uaa_args '';
+    set $need_age_args '';
+    set $last_age 0;
+    #  广告 用户年龄段存储
+    if ($cookie_uaa_local_type != '') {
+        set $last_age $cookie_uaa_local_type;
+    }
+
+    if ($cookie_uaa_type  ~ [1-9]) {
+        set $need_uaa_args $cookie_uaa_type;
+        set $last_age $cookie_uaa_type;
+    }
+    if ($cookie_age_group  ~ [1-9]) {
+        set $need_age_args $cookie_age_group;
+        set $last_age $cookie_age_group;
+    }
+
+    if ($arg_age_group ~ [1-9]) {
+        set $need_age_args  $arg_age_group;
+        set $need_uaa_args  $arg_age_group;
+        set $last_age $arg_age_group;
+    }
+    add_header Set-Cookie "age_group=$need_age_args;domain=$host_main;Path=/;Max-Age=2592000";
+    add_header Set-Cookie "uaa_type=$need_uaa_args;domain=$host_main;Path=/;Max-Age=2592000";
+    add_header Set-Cookie "$temp_cid_sbu_head";
+    add_header Set-Cookie "$temp_currency_head";
+    add_header Set-Cookie "$temp_country_code_head";
+
+    # H5的ab test
+    set $old_list_h5  1;
+    if ( $list_flag_h5 = "120" ) {
+        set $old_list_h5  0;
+    }
+    if ( $list_flag_h5 = "320" ) {
+        set $old_list_h5  3;
+    }
+    if ( $arg_force_ssr = 1 ) { #强制走ssr
+        set $old_list_h5 3;
+    }
+    if ( $old_list_h5 != 1 ){
+            rewrite ^(/..)+\/(.*)-m([0-9]+)\/?$ $1/product/$2/$3?come_from=$old_list_h5 redirect;
+            rewrite ^(/..)+\/(.*)-r([0-9]+)(.*)$ $1/list/$2/$3?currentRouteSn=$3 redirect;
+
+            rewrite ^/([^\/]*)-m([0-9]+)\/?$ /en/product/$1/$2?come_from=$old_list_h5 redirect;
+            rewrite ^/([^\/]*)-r([0-9]+)(.*)$ /en/list/$1/$2?currentRouteSn=$2 redirect;
+            rewrite ^(/..)+\/cart\.php$ $1/cart?come_from=$old_list_h5 redirect;
+            rewrite \/cart\.php$ /en/cart?come_from=$old_list_h5 redirect;
+    }
+
+    if ( $old_list_h5 = 1) {
+       proxy_pass              http://floryday_backend;
+    }
+    set $cache_disabled 1;
+    proxy_redirect          off;
+    proxy_set_header        ngcountrycode $temp_cookie_country_code;
+    proxy_set_header        ngcurrency      $temp_cookie_currency;
+    proxy_set_header        needageargs $need_age_args;
+    proxy_set_header        needuaaargs $need_uaa_args;
+    proxy_set_header        lastage $last_age;
+    proxy_set_header        Host            $host;
+    proxy_set_header        X-Port          $server_port;
+    proxy_set_header        X-Real-IP       $remote_addr;
+    proxy_set_header        NO-NGINX-CACHE  $no_nginx_cache;
+    proxy_set_header        AB-TEST         $abTest;
+    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_ignore_client_abort on;
+    proxy_next_upstream http_502 http_504 error timeout invalid_header;
+    proxy_no_cache $cookie_preview $cache_disabled;
+    proxy_cache_bypass $cookie_preview $cache_disabled;
+    proxy_cache        cache_one;
+    proxy_cache_valid  200 1h;
+#       proxy_cache_valid  301 302 1h;
+#       proxy_cache_valid  any 1m;
+    proxy_cache_key    $nginx_cache_key;
+    proxy_ignore_headers "Cache-Control" "Expires" "Set-Cookie";
+    proxy_store off;
+    break;
+}
+
+location ~* ^((/..)?/booking(.*)|(/..)?/(favorite\.php)(.*)|(/..)?/favorite)$ {
+    set $need_uaa_args '';
+    set $need_age_args '';
+    set $last_age 0;
+    #  广告 用户年龄段存储
+    if ($cookie_uaa_local_type != '') {
+        set $last_age $cookie_uaa_local_type;
+    }
+
+    if ($cookie_uaa_type  ~ [1-9]) {
+        set $need_uaa_args $cookie_uaa_type;
+        set $last_age $cookie_uaa_type;
+    }
+
+    if ($cookie_age_group  ~ [1-9]) {
+        set $need_age_args $cookie_age_group;
+        set $last_age $cookie_age_group;
+    }
+
+    if ($arg_age_group ~ [1-9]) {
+        set $need_age_args  $arg_age_group;
+        set $need_uaa_args  $arg_age_group;
+        set $last_age $arg_age_group;
+    }
+    add_header Set-Cookie "age_group=$need_age_args;domain=$host_main;Path=/;Max-Age=2592000";
+    add_header Set-Cookie "uaa_type=$need_uaa_args;domain=$host_main;Path=/;Max-Age=2592000";
+    add_header Set-Cookie "$temp_cid_sbu_head";
+    add_header Set-Cookie "$temp_currency_head";
+    add_header Set-Cookie "$temp_country_code_head";
+    #获取旧H5跳新H5页面的参数
+    set $come_from 1;
+    if ($arg_come_from != '') {
+        set $come_from $arg_come_from;
+    }
+    set $pay_now "";
+    if ($arg_act = "pay_now") {
+        set $pay_now 1;
+    }
+    #处理新版H5 reorder功能
+    set $reorder "";
+    if ($uri ~* (/cart.php)?) {
+        set $reorder 1;
+    }
+    if ($arg_reorder = 1) {
+        set $reorder 1$reorder;
+    }
+    if ($arg_order_sn != '') {
+        set $reorder 1$reorder;
+    }
+    if ($reorder = '111' ) {
+        set $list_flag_h5  2;
+    }
+    # 如果是预览账号登录, 缓存页面不再缓存, 后端需要session_start
+        set $no_nginx_cache no;
+        if ($cookie_preview != '') {
+           set $no_nginx_cache yes;
+        }
+        set $nginx_cache_key '';
+        include app-snippets/floryday-args-rule.proxy;
+        include app-snippets/floryday-args-rule-detail.proxy;
+        add_header Nginx-Cache $upstream_cache_status;
+        if ($nginx_cache_key = '') {
+            set $cache_disabled 1;
+        }
+        # 如果分abtest 就不缓存
+        if ($cookie_abtest_experiment_pc_productdetail_page = '') {
+            set $cache_disabled 1;
+        }
+    # H5的ab test
+    set $old_list_h5  1;
+    if ( $list_flag_h5 = "${inABTestListH5}20" ) {
+        set $old_list_h5  0;
+    }
+    if ( $list_flag_h5 = "320" ) {
+        set $old_list_h5  3;
+    }
+    if ( $old_list_h5 != 1 ) {
+            rewrite ^(/..)+\/(.*)-r([0-9]+)\/(new-arrival)\/?$ $1/list/$2/$3?newArrivals=newArrivals&currentRouteSn=$3 redirect;
+            rewrite \/(.*)-r([0-9]+)\/(new-arrival)\/?$ /en/list/$1/$2?newArrivals=newArrivals&currentRouteSn=$2 redirect;
+            rewrite ^(/..)+\/(.*)-m([0-9]+)\/?$ $1/product/$2/$3?come_from=$old_list_h5 redirect;
+            rewrite ^(/..)+\/(.*)-r([0-9]+)(.*)$ $1/list/$2/$3?currentRouteSn=$3 redirect;
+            rewrite \/(.*)-m([0-9]+)\/?$ /en/product/$1/$2?come_from=$old_list_h5 redirect;
+            rewrite \/(.*)-r([0-9]+)(.*)$ /en/list/$1/$2?currentRouteSn=$2 redirect;
+
+            #rewrite "^(/..)+\/(sale)\?type=category&key=(\d{3,})$" $1/flashSale?currentRouteSn=$3 redirect;
+            #rewrite "\/(sale)\?type=category&key=(\d{3,})$" /en/flashSale?currentRouteSn=$2 redirect;
+
+            rewrite ^(/..)+\/(sale)(.*)$ $1/flashSale/ALL?currentRouteSn=ALL redirect;
+            rewrite \/(sale)(.*)$ /en/flashSale/ALL?currentRouteSn=ALL redirect;
+
+            rewrite ^(/..)+/[^\/]*(booking)(.*)$ $1/preOrder? redirect;
+            rewrite [^\/]*(booking)(.*)$ /en/preOrder? redirect;
+
+
+            proxy_pass              http://floryday_h5;
+            break;
+        }
+    if ( $old_list_h5 = 1) {
+       proxy_pass              http://floryday_backend;
+    }
+
+    set $cache_disabled 1;
+    proxy_redirect          off;
+    proxy_set_header        Host            $host;
+    proxy_set_header        X-Port          $server_port;
+    proxy_set_header        X-Real-IP       $remote_addr;
+    proxy_set_header        NO-NGINX-CACHE  $no_nginx_cache;
+    proxy_set_header        AB-TEST         $abTest;
+    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_ignore_client_abort on;
+    proxy_next_upstream http_502 http_504 error timeout invalid_header;
+    proxy_no_cache $cookie_preview $cache_disabled;
+    proxy_cache_bypass $cookie_preview $cache_disabled;
+    proxy_cache        cache_one;
+    proxy_cache_valid  200 1h;
+#       proxy_cache_valid  301 302 1h;
+#       proxy_cache_valid  any 1m;
+    proxy_cache_key    $nginx_cache_key;
+    proxy_ignore_headers "Cache-Control" "Expires" "Set-Cookie";
+    proxy_store off;
+    break;
+}

@@ -1,0 +1,32 @@
+location /perf {
+    access_log  logs/access-floryday-perf-www.log  perf;
+    add_header Content-Type "text/html;charset=utf-8";
+    return 200;
+}
+
+location /pay_notify.php {
+    auth_basic off;
+    proxy_pass              http://floryday_backend;
+    proxy_redirect          off;
+    proxy_set_header        Host            $host;
+    proxy_set_header        X-Port          $server_port;
+    proxy_set_header        X-Real-IP       $remote_addr;
+    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_ignore_client_abort on;
+    proxy_next_upstream http_502 http_504 http_500 error timeout invalid_header;
+}
+
+
+location / {
+    if ($arg_full_site = "true") {
+        add_header Set-Cookie "full_site=true;Domain=.floryday.com;Path=/;Max-Age=86400";
+    }
+    proxy_pass              http://floryday_backend;
+    proxy_redirect          off;
+    proxy_set_header        Host            $host;
+    proxy_set_header        X-Port          $server_port;
+    proxy_set_header        X-Real-IP       $remote_addr;
+    proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_ignore_client_abort on;
+    proxy_next_upstream http_502 http_504 http_500 error timeout invalid_header;
+}

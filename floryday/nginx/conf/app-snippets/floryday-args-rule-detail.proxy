@@ -1,0 +1,20 @@
+set $cache_disabled 0;
+
+set $en_index '';
+if ($cookie_lang_code != '') {
+    set $en_index $cookie_lang_code;
+}
+set $temp_en_index '';
+set $mid_detail '';
+if ($uri  ~* ^(/..)?/[^\/]*-m([0-9]+)\/?$) {
+    set $temp_en_index $1;
+    set $mid_detail $2;
+}
+if ($temp_en_index != '') {
+    set $en_index $temp_en_index;
+}
+if ($mid_detail != '') {
+    set $new_args_detail $arg_color$arg_size$en_index$mid_detail;
+    set $abTest 8;
+    set $nginx_cache_key $scheme-$http_x_forwarded_proto://floryday-$host-$temp_cookie_country_code-$temp_cookie_currency-$cookie_not_header_tips-$cookie_not_pop-$cookie_abtest_assign-supperdetail-$is_args$new_args_detail;
+}

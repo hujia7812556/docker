@@ -1,0 +1,11 @@
+upstream floryday_ssr_prod {
+	server internal-floryday-node-prod-828742037.us-east-1.elb.amazonaws.com:80;
+}
+
+upstream floryday_ssr_pre {
+	server internal-floryday-node-pre-111114274.us-east-1.elb.amazonaws.com:80;
+}
+
+upstream floryday_ssr_test {
+	server ft-ssr-1965335146.us-east-1.elb.amazonaws.com:80;
+}
