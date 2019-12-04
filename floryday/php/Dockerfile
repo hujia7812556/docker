@@ -105,5 +105,12 @@ RUN cd /tmp && rm -rf rabbitmq-c-0.9.0 && \
     make clean && make && make install
 RUN cp -i -rf /usr/local/librabbitmq/lib/x86_64-linux-gnu/* /usr/local/librabbitmq/lib/
 RUN yes /usr/local/librabbitmq | pecl install amqp
+RUN apt-get -y install libpng-dev
+RUN cd /tmp/php-7.1.28/ext/gd/ \
+    && phpize && \
+    ./configure \
+    --with-php-config=/usr/local/bin/php-config \
+    && make clean && make && make install
 RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer
+RUN chmod -R 777 /var/log/

@@ -11,17 +11,17 @@ php-fpm:
       - redis
     # external_links:
     #   - search
-php-fpm-5.6:
-    container_name: fd_php-fpm-5.6
-    build: ./php-fpm-5.6
-    volumes:
-      - D:/myproject/:/usr/share/nginx/html
-    ports:
-    - "9001:9000"
-    links:
-      - memcached
-      - redis
-      - php-fpm
+# php-fpm-5.6:
+#     container_name: fd_php-fpm-5.6
+#     build: ./php-fpm-5.6
+#     volumes:
+#       - D:/myproject/:/usr/share/nginx/html
+#     ports:
+#     - "9001:9000"
+#     links:
+#       - memcached
+#       - redis
+#       - php-fpm
 nginx:
     container_name: fd_nginx
     build: ./nginx
@@ -33,7 +33,6 @@ nginx:
       - ./nginx/conf/conf.d:/etc/nginx/conf.d
     links:
       - php-fpm
-      - php-fpm-5.6
 memcached:
     container_name: fd_memcached
     build: ./memcached
