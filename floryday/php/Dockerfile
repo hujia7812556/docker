@@ -111,6 +111,16 @@ RUN cd /tmp/php-7.1.28/ext/gd/ \
     ./configure \
     --with-php-config=/usr/local/bin/php-config \
     && make clean && make && make install
+RUN apt-get -y install libxml2
+RUN apt-get -y install libxml2-dev
+RUN cd /tmp/php-7.1.28/ext/soap/ \
+    && phpize && \
+    ./configure \
+    --with-php-config=/usr/local/bin/php-config \
+    && make clean && make && make install
+RUN apt-get install -y libzip-dev
+RUN yes | pecl install -o -f zip
 RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer
 RUN chmod -R 777 /var/log/
+RUN  apt-get update && apt-get -y install cron
