@@ -50,8 +50,8 @@ redis:
     command:
       redis-server
 es:
-    image: elasticsearch:6.8.0
     container_name: es
+    build: ./elasticsearch
     environment:
       # - cluster.initial_master_nodes=es
       - cluster.name=elasticsearch
@@ -61,3 +61,5 @@ es:
         hard: -1
     ports:
       - "9200:9200"
+    volumes:
+      - D:/es_data/:/usr/share/elasticsearch/data
