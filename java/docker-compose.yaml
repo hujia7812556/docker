@@ -1,0 +1,10 @@
+tomcat:
+    container_name: tomcat
+    build: ./tomcat
+    ports:
+      - "8080:8080"
+java:
+    container_name: java
+    build: ./java
+    tty: true
+    # restart: always
