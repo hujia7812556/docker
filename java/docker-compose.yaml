@@ -1,10 +1,19 @@
-tomcat:
-    container_name: tomcat
-    build: ./tomcat
+# tomcat:
+#     container_name: tomcat
+#     build: ./tomcat
+#     ports:
+#       - "8080:8080"
+# java:
+#     container_name: java
+#     build: ./java
+#     tty: true
+#     # restart: always
+mysql:
+    container_name: mysql
+    build: ./mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      # MYSQL_USER: 'root'
+      # MYSQL_PASS: '123456'
     ports:
-      - "8080:8080"
-java:
-    container_name: java
-    build: ./java
-    tty: true
-    # restart: always
+      - "3306:3306"

@@ -1,1 +1,14 @@
 FROM openjdk:latest
+
+RUN yum update -y
+RUN yum install -y vim \
+    && echo "set number" >> /root/.vimrc
+RUN echo "alias ll='ls -l'" >> ~/.bashrc && /bin/bash -c "source ~/.bashrc"
+RUN yum install -y wget
+
+RUN cd /usr/local &&\
+    wget https://mirrors.tuna.tsinghua.edu.cn/apache/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+#    tar zxvf apache-maven-3.6.3-bin.tar.gz -C /usr/local && \
+#    mv /usr/local/apache-maven-3.6.3/ /usr/local/apache-maven && \
+#    echo "export M2_HOME=/usr/local/apache-maven" >> ~/.bash_profile && \
+#    echo "export PATH=$PATH:$M2_HOME/bin" >> ~/.bash_profile
