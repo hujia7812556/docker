@@ -17,3 +17,5 @@ mysql:
       # MYSQL_PASS: '123456'
     ports:
       - "3306:3306"
+    volumes:
+      - /Users/lebbay/soft/mysql/data:/var/lib/mysql
