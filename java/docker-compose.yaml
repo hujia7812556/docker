@@ -19,3 +19,18 @@ mysql:
       - "3306:3306"
     volumes:
       - /Users/lebbay/soft/mysql/data:/var/lib/mysql
+redis:
+    container_name: redis
+    build: ./redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command:
+      redis-server
+# rabbitmq:
+#     image: redis
+#     restart: always
+#     ports:
+#       - "6379:6379"
+#     command:
+#       redis-server
