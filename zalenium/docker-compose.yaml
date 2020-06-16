@@ -1,6 +1,5 @@
 zalenium:
     container_name: zalenium
-    build: ./zalenium
     ports:
       - "4444:4444"
     command:

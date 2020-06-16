@@ -63,3 +63,8 @@ es:
       - "9200:9200"
     volumes:
       - D:/es_data/:/usr/share/elasticsearch/data
+es-header:
+    container_name: es_header
+    image: mobz/elasticsearch-head:5
+    ports:
+      - "9100:9100"
