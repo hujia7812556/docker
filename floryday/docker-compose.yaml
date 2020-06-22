@@ -1,6 +1,7 @@
 php-fpm:
     container_name: fd_php-fpm
     build: ./php
+    # image: "hujia7812556/floryday:fd_php-fpm"
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
@@ -25,6 +26,7 @@ php-fpm:
 nginx:
     container_name: fd_nginx
     build: ./nginx
+    # image: "hujia7812556/floryday:fd_php-fpm"
     ports:
       - "80:80"
       - "443:443"

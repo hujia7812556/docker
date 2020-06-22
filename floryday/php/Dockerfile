@@ -25,8 +25,9 @@ RUN apt-get install -y vim \
 RUN apt-get install -y zip \
     && apt-get install -y unzip
     ####redis
-RUN yes | pecl install igbinary -o -f \
-    && apt-get update && yes | pecl install -o -f redis
+RUN yes | pecl install igbinary -o -f 
+RUN apt-get install -y libzstd-dev
+RUN apt-get update && yes | pecl install -o -f redis
     ###xhprof
 RUN git clone https://github.com/longxinH/xhprof.git /tmp/xhprof \
     && cd /tmp/xhprof/extension/ \
