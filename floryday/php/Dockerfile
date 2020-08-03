@@ -125,3 +125,5 @@ RUN curl -sS https://getcomposer.org/installer | php && \
     mv composer.phar /usr/local/bin/composer
 RUN chmod -R 777 /var/log/
 RUN  apt-get update && apt-get -y install cron
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get install -y nodejs
