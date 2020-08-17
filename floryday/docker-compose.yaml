@@ -8,10 +8,12 @@ php-fpm:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
       - D:/myproject/:/usr/share/nginx/html
+    working_dir: /usr/share/nginx/html/vb
     restart: always
     links:
       - memcached
       - redis
+      - es
     # external_links:
     #   - search
 # php-fpm-5.6:
