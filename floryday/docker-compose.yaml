@@ -74,3 +74,16 @@ es-header:
     image: mobz/elasticsearch-head:5
     ports:
       - "9100:9100"
+
+mysql:
+  container_name: mysql
+  build: ./mysql
+  environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+  command: --default-authentication-plugin=mysql_native_password
+  restart: always
+  ports:
+    - "3306:3306"
+  volumes:
+    - E:/mysql/data:/var/lib/mysql
+    - ./mysql/etc/my.cnf:/etc/mysql/my.cnf
