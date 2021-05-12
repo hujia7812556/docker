@@ -7,13 +7,13 @@ php-fpm:
     volumes:
       - ./php/php.ini:/usr/local/etc/php/php.ini
       - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
-      - D:/myproject/:/usr/share/nginx/html
+      - /Users/hujia/myproject/:/usr/share/nginx/html
     working_dir: /usr/share/nginx/html/vb
     restart: always
-    links:
-      - memcached
-      - redis
-      - es
+#     links:
+#       - memcached
+#       - redis
+#       - es
     # external_links:
     #   - search
 # php-fpm-5.6:
@@ -27,18 +27,18 @@ php-fpm:
 #       - memcached
 #       - redis
 #       - php-fpm
-nginx:
-    container_name: fd_nginx
-    build: ./nginx
-    # image: "hujia7812556/floryday:fd_nginx"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - D:/myproject/:/usr/share/nginx/html
-      - ./nginx/conf/conf.d:/etc/nginx/conf.d
-    links:
-      - php-fpm
+# nginx:
+#     container_name: fd_nginx
+#     build: ./nginx
+#     # image: "hujia7812556/floryday:fd_nginx"
+#     ports:
+#       - "80:80"
+#       - "443:443"
+#     volumes:
+#       - D:/myproject/:/usr/share/nginx/html
+#       - ./nginx/conf/conf.d:/etc/nginx/conf.d
+#     links:
+#       - php-fpm
 memcached:
     container_name: fd_memcached
     build: ./memcached
@@ -55,35 +55,35 @@ redis:
       - "6379:6379"
     command:
       redis-server
-es:
-    container_name: es
-    build: ./elasticsearch
-    environment:
-      # - cluster.initial_master_nodes=es
-      - cluster.name=elasticsearch
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    ports:
-      - "9200:9200"
-    volumes:
-      - D:/es_data/:/usr/share/elasticsearch/data
-es-header:
-    container_name: es_header
-    image: mobz/elasticsearch-head:5
-    ports:
-      - "9100:9100"
+# es:
+#     container_name: es
+#     build: ./elasticsearch
+#     environment:
+#       # - cluster.initial_master_nodes=es
+#       - cluster.name=elasticsearch
+#     ulimits:
+#       memlock:
+#         soft: -1
+#         hard: -1
+#     ports:
+#       - "9200:9200"
+#     volumes:
+#       - D:/es_data/:/usr/share/elasticsearch/data
+# es-header:
+#     container_name: es_header
+#     image: mobz/elasticsearch-head:5
+#     ports:
+#       - "9100:9100"
 
-mysql:
-  container_name: mysql
-  build: ./mysql
-  environment:
-      MYSQL_ROOT_PASSWORD: "123456"
-  command: --default-authentication-plugin=mysql_native_password
-  restart: always
-  ports:
-    - "3306:3306"
-  volumes:
-    - E:/mysql/data:/var/lib/mysql
-    - ./mysql/etc/my.cnf:/etc/mysql/my.cnf
+# mysql:
+#   container_name: mysql
+#   build: ./mysql
+#   environment:
+#       MYSQL_ROOT_PASSWORD: "123456"
+#   command: --default-authentication-plugin=mysql_native_password
+#   restart: always
+#   ports:
+#     - "3306:3306"
+#   volumes:
+#     - E:/mysql/data:/var/lib/mysql
+#     - ./mysql/etc/my.cnf:/etc/mysql/my.cnf

@@ -18,7 +18,7 @@ mysql:
     ports:
       - "3306:3306"
     volumes:
-      - /Users/lebbay/soft/mysql/data:/var/lib/mysql
+      - /Users/hujia/soft/mysql/data:/var/lib/mysql
 redis:
     container_name: redis
     build: ./redis

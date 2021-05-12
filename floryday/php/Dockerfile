@@ -36,7 +36,7 @@ RUN git clone https://github.com/longxinH/xhprof.git /tmp/xhprof \
     && make && make install \
     && rm -rf /var/tmp/xhprof && mkdir /var/tmp/xhprof && chmod -R 777 /var/tmp/xhprof
     ####xdebug
-RUN apt-get update && yes | pecl install -o -f xdebug
+RUN apt-get update && yes | pecl install http://pecl.php.net/get/xdebug-2.9.8.tgz
     # oauth
 RUN apt-get update \
     && apt-get install -y libpcre3-dev \
@@ -91,7 +91,7 @@ RUN cd /tmp/php-7.1.28/ext/opcache/ \
     ./configure \
     --with-php-config=/usr/local/bin/php-config \
     && make clean && make && make install
-RUN yes | pecl install swoole -o -f
+RUN yes | pecl install swoole -o -f http://pecl.php.net/get/swoole-4.5.11.tgz
 RUN yes | pecl install apcu -o -f
 RUN apt-get install graphviz -y
 RUN yes | pecl install mongodb
@@ -104,26 +104,28 @@ RUN cd /tmp && rm -rf rabbitmq-c-0.9.0 && \
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local/librabbitmq .. && \
     cmake --build . && \
     make clean && make && make install
-RUN cp -i -rf /usr/local/librabbitmq/lib/x86_64-linux-gnu/* /usr/local/librabbitmq/lib/
-RUN yes /usr/local/librabbitmq | pecl install amqp
-RUN apt-get -y install libpng-dev
-RUN cd /tmp/php-7.1.28/ext/gd/ \
-    && phpize && \
-    ./configure \
-    --with-php-config=/usr/local/bin/php-config \
-    && make clean && make && make install
-RUN apt-get -y install libxml2
-RUN apt-get -y install libxml2-dev
-RUN cd /tmp/php-7.1.28/ext/soap/ \
-    && phpize && \
-    ./configure \
-    --with-php-config=/usr/local/bin/php-config \
-    && make clean && make && make install
-RUN apt-get install -y libzip-dev
-RUN yes | pecl install -o -f zip
-RUN curl -sS https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/local/bin/composer
-RUN chmod -R 777 /var/log/
-RUN  apt-get update && apt-get -y install cron
-RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
-RUN apt-get install -y nodejs
+# RUN cp -i -rf /usr/local/librabbitmq/lib/x86_64-linux-gnu/* /usr/local/librabbitmq/lib/
+# m1 CPU需要修改
+RUN cp -i -rf /usr/local/librabbitmq/lib/aarch64-linux-gnu/* /usr/local/librabbitmq/lib/
+# RUN yes /usr/local/librabbitmq | pecl install amqp
+# RUN apt-get -y install libpng-dev
+# RUN cd /tmp/php-7.1.28/ext/gd/ \
+#     && phpize && \
+#     ./configure \
+#     --with-php-config=/usr/local/bin/php-config \
+#     && make clean && make && make install
+# RUN apt-get -y install libxml2
+# RUN apt-get -y install libxml2-dev
+# RUN cd /tmp/php-7.1.28/ext/soap/ \
+#     && phpize && \
+#     ./configure \
+#     --with-php-config=/usr/local/bin/php-config \
+#     && make clean && make && make install
+# RUN apt-get install -y libzip-dev
+# RUN yes | pecl install -o -f zip
+# RUN curl -sS https://getcomposer.org/installer | php && \
+#     mv composer.phar /usr/local/bin/composer
+# RUN chmod -R 777 /var/log/
+# RUN  apt-get update && apt-get -y install cron
+# RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+# RUN apt-get install -y nodejs
