@@ -1,3 +1,3 @@
-FROM elasticsearch:6.8.0
+FROM elasticsearch:7.12.1
 
 RUN elasticsearch-plugin install analysis-kuromoji

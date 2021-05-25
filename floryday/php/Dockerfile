@@ -107,24 +107,23 @@ RUN cd /tmp && rm -rf rabbitmq-c-0.9.0 && \
 # RUN cp -i -rf /usr/local/librabbitmq/lib/x86_64-linux-gnu/* /usr/local/librabbitmq/lib/
 # m1 CPU需要修改
 RUN cp -i -rf /usr/local/librabbitmq/lib/aarch64-linux-gnu/* /usr/local/librabbitmq/lib/
-# RUN yes /usr/local/librabbitmq | pecl install amqp
-# RUN apt-get -y install libpng-dev
-# RUN cd /tmp/php-7.1.28/ext/gd/ \
-#     && phpize && \
-#     ./configure \
-#     --with-php-config=/usr/local/bin/php-config \
-#     && make clean && make && make install
-# RUN apt-get -y install libxml2
-# RUN apt-get -y install libxml2-dev
-# RUN cd /tmp/php-7.1.28/ext/soap/ \
-#     && phpize && \
-#     ./configure \
-#     --with-php-config=/usr/local/bin/php-config \
-#     && make clean && make && make install
-# RUN apt-get install -y libzip-dev
-# RUN yes | pecl install -o -f zip
-# RUN curl -sS https://getcomposer.org/installer | php && \
-#     mv composer.phar /usr/local/bin/composer
+RUN yes /usr/local/librabbitmq | pecl install amqp
+RUN apt-get -y install libpng-dev
+RUN cd /tmp/php-7.1.28/ext/gd/ \
+    && phpize && \
+    ./configure \
+    --with-php-config=/usr/local/bin/php-config \
+    && make clean && make && make install
+RUN apt-get -y install libxml2
+RUN apt-get -y install libxml2-dev
+RUN cd /tmp/php-7.1.28/ext/soap/ \
+    && phpize && \
+    ./configure \
+    --with-php-config=/usr/local/bin/php-config \
+    && make clean && make && make install
+RUN apt-get install -y libzip-dev
+RUN yes | pecl install -o -f zip
+RUN curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
 # RUN chmod -R 777 /var/log/
 # RUN  apt-get update && apt-get -y install cron
 # RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
