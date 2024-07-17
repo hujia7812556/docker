@@ -1,0 +1,9 @@
+chatgpt-next-web:
+    container_name: zalenium
+    image: yidadaa/chatgpt-next-web:latest
+    ports:
+        - "3000:3000"
+    environment:
+        - OPENAI_API_KEY=xxxxxx
+        - BASE_URL=xxxxxx
+
