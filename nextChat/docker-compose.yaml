@@ -1,0 +1,10 @@
+services:
+    nextchat:
+        container_name: nextchat
+        build: .
+        ports:
+            - "3000:3000"
+        environment:
+            OPENAI_API_KEY: sk-hFRM8hvFnBRWD7rj0fDb5942199e45268c3fDc8f9d98B336
+            BASE_URL: https://www.gptapi.us/v1
+            CODE: er5xTaa1s1Qjyj,19870925
