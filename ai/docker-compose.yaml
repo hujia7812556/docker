@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  next-chat:
+    container_name: next-chat
+    build: ./nextChat
+    ports:
+      - "3000:3000"
+    environment:
+      OPENAI_API_KEY: sk-hFRM8hvFnBRWD7rj0fDb5942199e45268c3fDc8f9d98B336
+      BASE_URL: https://www.gptapi.us/v1
+      CODE: er5xTaa1s1Qjyj,19870925
+  lobe-chat:
+    image: lobehub/lobe-chat
+    container_name: lobe-chat
+    restart: always
+    ports:
+      - '3210:3210'
+    environment:
+      OPENAI_API_KEY: sk-eRXOsAQAyZ0Uk2DM329f2338B70f45829f89D499328c4122
+      OPENAI_PROXY_URL: https://www.gptapi.us/v1
+      ACCESS_CODE: B1hwbb2W0OUhtW
