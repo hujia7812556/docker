@@ -2,9 +2,9 @@ version: '3.8'
 
 services:
   next-chat:
+    image: yidadaa/chatgpt-next-web
     container_name: next-chat
     restart: always
-    build: ./nextChat
     ports:
       - "3000:3000"
     environment:
