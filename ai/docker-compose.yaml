@@ -10,6 +10,8 @@ services:
     environment:
       OPENAI_API_KEY: ${NEXT_CHAT_OPENAI_API_KEY}
       BASE_URL: ${BASE_URL}
+      ANTHROPIC_API_KEY: ${NEXT_CHAT_OPENAI_API_KEY}
+      ANTHROPIC_URL: ${ANTHROPIC_PROXY_URL}
       CODE: ${NEXT_CHAT_ACCESS_CODE}
   lobe-chat:
     image: lobehub/lobe-chat
@@ -21,7 +23,7 @@ services:
       OPENAI_API_KEY: ${LOBE_CHAT_OPENAI_API_KEY}
       OPENAI_PROXY_URL: ${BASE_URL}
       ANTHROPIC_API_KEY: ${LOBE_CHAT_OPENAI_API_KEY}
-      ANTHROPIC_PROXY_URL: ${ANTHROPIC_PROXY_URLANTHROPIC_PROXY_URL}
+      ANTHROPIC_PROXY_URL: ${ANTHROPIC_PROXY_URL}
       OPENAI_MODEL_LIST: +claude-3-5-sonnet=Claude 3.5 Sonnet(自定义)<200000:vision:fc>,+claude-3-haiku=Claude 3 Haiku(自定义)<200000:vision:fc>,+claude-3-sonnet=Claude 3 Sonnet(自定义)<200000:vision:fc>,+claude-3-opus=Claude 3 Opus(自定义)<200000:vision:fc>
       ACCESS_CODE: ${LOBE_CHAT_ACCESS_CODE}
       #NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${LOBE_CHAT_NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
