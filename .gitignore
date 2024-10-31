@@ -2,3 +2,4 @@ lnmp/php/data
 .idea/
 ai/update.log
 ai/.env
+.vscode
