@@ -19,6 +19,7 @@ mysql:
       - "3306:3306"
     volumes:
       - /Users/hujia/soft/mysql/data:/var/lib/mysql
+      - ./mysql/my.cnf:/etc/my.cnf
 redis:
     container_name: redis
     build: ./redis

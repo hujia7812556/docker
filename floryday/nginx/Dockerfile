@@ -2,7 +2,7 @@ FROM nginx
 
 COPY ./conf/conf.d /etc/nginx/conf.d
 COPY ./conf/app-snippets /etc/nginx/app-snippets
-COPY ./conf/ssl /etc/nginx/ssl
+# COPY ./conf/ssl /etc/nginx/ssl
 COPY ./init.sh /tmp/
 
 ENV TZ=Asia/Shanghai

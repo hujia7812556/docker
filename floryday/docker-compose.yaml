@@ -1,19 +1,19 @@
-php-fpm:
-    container_name: fd_php-fpm
-    build: ./php
-    # image: "hujia7812556/floryday:fd_php-fpm"
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./php/php.ini:/usr/local/etc/php/php.ini
-      - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
-      - /Users/hujia/myproject/:/usr/share/nginx/html
-    working_dir: /usr/share/nginx/html/vb
-    restart: always
+# php-fpm:
+#     container_name: fd_php-fpm
+#     build: ./php
+#     # image: "hujia7812556/floryday:fd_php-fpm"
+#     ports:
+#       - "3000:3000"
+#     volumes:
+#       - ./php/php.ini:/usr/local/etc/php/php.ini
+#       - ./php/php-fpm.conf:/usr/local/etc/php-fpm.conf
+#       - /Users/hujia/myproject/:/usr/share/nginx/html
+#     working_dir: /usr/share/nginx/html/vb
+#     restart: always
 #     links:
 #       - memcached
 #       - redis
-#       - es
+      # - es
     # external_links:
     #   - search
 # php-fpm-5.6:
@@ -35,45 +35,46 @@ php-fpm:
 #       - "80:80"
 #       - "443:443"
 #     volumes:
-#       - D:/myproject/:/usr/share/nginx/html
+#       - /Users/hujia/myproject/:/usr/share/nginx/html
 #       - ./nginx/conf/conf.d:/etc/nginx/conf.d
 #     links:
 #       - php-fpm
-memcached:
-    container_name: fd_memcached
-    build: ./memcached
-    restart: always
-    ports:
-      - "11211:11211"
-    environment:
-      - MEMCACHED_CACHE_SIZE=128
-redis:
-    container_name: redis
-    build: ./redis
-    restart: always
-    ports:
-      - "6379:6379"
-    command:
-      redis-server
-# es:
-#     container_name: es
-#     build: ./elasticsearch
+# memcached:
+#     container_name: fd_memcached
+#     build: ./memcached
+#     restart: always
+#     ports:
+#       - "11211:11211"
 #     environment:
-#       # - cluster.initial_master_nodes=es
-#       - cluster.name=elasticsearch
-#     ulimits:
-#       memlock:
-#         soft: -1
-#         hard: -1
+#       - MEMCACHED_CACHE_SIZE=128
+# redis:
+#     container_name: redis
+#     build: ./redis
+#     restart: always
 #     ports:
-#       - "9200:9200"
-#     volumes:
-#       - D:/es_data/:/usr/share/elasticsearch/data
-# es-header:
-#     container_name: es_header
-#     image: mobz/elasticsearch-head:5
-#     ports:
-#       - "9100:9100"
+#       - "6379:6379"
+#     command:
+#       redis-server
+es:
+    container_name: es
+    build: ./elasticsearch
+    environment:
+      # - cluster.initial_master_nodes=es
+      - cluster.name=elasticsearch
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - /Users/hujia/data/es_data/:/usr/share/elasticsearch/data
+es-header:
+    container_name: es_header
+    image: mobz/elasticsearch-head:5
+    ports:
+      - "9100:9100"
 
 # mysql:
 #   container_name: mysql
