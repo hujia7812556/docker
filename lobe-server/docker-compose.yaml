@@ -32,6 +32,8 @@ services:
       - 'MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}'
       - 'MINIO_DOMAIN=${S3_PUBLIC_DOMAIN}'
       - 'MINIO_API_CORS_ALLOW_ORIGIN=${APP_URL}' # Your LobeChat's domain name.
+    env_file:
+      - .env
     restart: always
     command: >
       server /etc/minio/data --address ":9000" --console-address ":9001"
@@ -51,6 +53,8 @@ services:
       - 'DB_URL=postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@postgresql:5432/logto'
       - 'ENDPOINT=${AUTH_LOGTO_ENDPOINT}'
       - 'ADMIN_ENDPOINT=${AUTH_LOGTO_ADMIN_ENDPOINT}'
+      # - 'LIMITER_MAX_ATTEMPTS=5'
+      # - 'LIMITER_DURATION_SECONDS=300'
     entrypoint: ['sh', '-c', 'npm run cli db seed -- --swe && npm start']
 
   lobe:
