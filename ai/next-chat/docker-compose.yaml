@@ -1,0 +1,9 @@
+services:
+  next-chat:
+    image: yidadaa/chatgpt-next-web
+    container_name: next-chat
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
