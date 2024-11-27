@@ -39,23 +39,23 @@ services:
       server /etc/minio/data --address ":9000" --console-address ":9001"
 
 
-  logto:
-    image: svhd/logto
-    container_name: lobe-logto
-    ports:
-      - '3001:3001'
-      - '3002:3002'
-    depends_on:
-      postgresql:
-        condition: service_healthy
-    environment:
-      - 'TRUST_PROXY_HEADER=1'
-      - 'DB_URL=postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@postgresql:5432/logto'
-      - 'ENDPOINT=${AUTH_LOGTO_ENDPOINT}'
-      - 'ADMIN_ENDPOINT=${AUTH_LOGTO_ADMIN_ENDPOINT}'
-      # - 'LIMITER_MAX_ATTEMPTS=5'
-      # - 'LIMITER_DURATION_SECONDS=300'
-    entrypoint: ['sh', '-c', 'npm run cli db seed -- --swe && npm start']
+  # logto:
+  #   image: svhd/logto
+  #   container_name: lobe-logto
+  #   ports:
+  #     - '3001:3001'
+  #     - '3002:3002'
+  #   depends_on:
+  #     postgresql:
+  #       condition: service_healthy
+  #   environment:
+  #     - 'TRUST_PROXY_HEADER=1'
+  #     - 'DB_URL=postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@postgresql:5432/logto'
+  #     - 'ENDPOINT=${AUTH_LOGTO_ENDPOINT}'
+  #     - 'ADMIN_ENDPOINT=${AUTH_LOGTO_ADMIN_ENDPOINT}'
+  #     # - 'LIMITER_MAX_ATTEMPTS=5'
+  #     # - 'LIMITER_DURATION_SECONDS=300'
+  #   entrypoint: ['sh', '-c', 'npm run cli db seed -- --swe && npm start']
 
   lobe:
     image: lobehub/lobe-chat-database
@@ -65,7 +65,7 @@ services:
     depends_on:
       - postgresql
       - minio
-      - logto
+      # - logto
     env_file:
       - .env
     restart: always
