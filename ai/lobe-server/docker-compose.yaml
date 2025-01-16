@@ -58,7 +58,7 @@ services:
   #   entrypoint: ['sh', '-c', 'npm run cli db seed -- --swe && npm start']
 
   lobe:
-    image: lobehub/lobe-chat-database
+    build: ./lobe-chat
     container_name: lobe-chat
     ports:
       - '3210:3210'
