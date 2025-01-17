@@ -58,10 +58,11 @@ services:
   #   entrypoint: ['sh', '-c', 'npm run cli db seed -- --swe && npm start']
 
   lobe:
-    build:
-      context: ./lobe-chat
-      args:
-        - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+    # build:
+    #   context: ./lobe-chat
+    #   args:
+    #     - MY_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+    image: lobehub/lobe-chat-database
     container_name: lobe-chat
     ports:
       - '3210:3210'
