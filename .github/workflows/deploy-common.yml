@@ -49,69 +49,69 @@ jobs:
         echo "✅ Xray配置文件生成成功"
 
     - name: Create target directory on remote server
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          port: ${{ secrets.DEPLOY_PORT || 22 }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            mkdir -p ${{ secrets.DEPLOY_TARGET }}
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        port: ${{ secrets.DEPLOY_PORT || 22 }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        script: |
+          mkdir -p ${{ secrets.DEPLOY_TARGET }}
 
     - name: Backup and clean old backups on target server
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          port: ${{ secrets.DEPLOY_PORT || 22 }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            cd ${{ secrets.DEPLOY_TARGET }}
-            BACKUP_ROOT="${{ secrets.DEPLOY_TARGET }}_backups"
-            mkdir -p "$BACKUP_ROOT"
-            BACKUP_DIR="$BACKUP_ROOT/backup_$(date +%Y%m%d_%H%M%S)"
-            mkdir -p "$BACKUP_DIR"
-            # 备份整个目标目录（不包括备份目录自身）
-            cp -a ./ "$BACKUP_DIR/"
-            # 清理7天前的备份
-            find "$BACKUP_ROOT" -maxdepth 1 -type d -name "backup_*" -mtime +7 -exec rm -rf {} \;
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        port: ${{ secrets.DEPLOY_PORT || 22 }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        script: |
+          cd ${{ secrets.DEPLOY_TARGET }}
+          BACKUP_ROOT="${{ secrets.DEPLOY_TARGET }}_backups"
+          mkdir -p "$BACKUP_ROOT"
+          BACKUP_DIR="$BACKUP_ROOT/backup_$(date +%Y%m%d_%H%M%S)"
+          mkdir -p "$BACKUP_DIR"
+          # 备份整个目标目录（不包括备份目录自身）
+          cp -a ./ "$BACKUP_DIR/"
+          # 清理7天前的备份
+          find "$BACKUP_ROOT" -maxdepth 1 -type d -name "backup_*" -mtime +7 -exec rm -rf {} \;
 
     - name: Sync prod directory to target server
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          port: ${{ secrets.DEPLOY_PORT || 22 }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: "common/${{ github.event.inputs.server }}/*,common/${{ github.event.inputs.server }}/.env"
-          target: "${{ secrets.DEPLOY_TARGET }}"
-          strip_components: 2
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        port: ${{ secrets.DEPLOY_PORT || 22 }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        source: "common/${{ github.event.inputs.server }}/*,common/${{ github.event.inputs.server }}/.env"
+        target: "${{ secrets.DEPLOY_TARGET }}"
+        strip_components: 2
 
     - name: Ensure acme.json exists on target server
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            cd ${{ secrets.DEPLOY_TARGET }}
-            mkdir -p traefik/letsencrypt
-            if [ ! -f traefik/letsencrypt/acme.json ]; then
-              touch traefik/letsencrypt/acme.json
-              chmod 600 traefik/letsencrypt/acme.json
-            fi
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        script: |
+          cd ${{ secrets.DEPLOY_TARGET }}
+          mkdir -p traefik/letsencrypt
+          if [ ! -f traefik/letsencrypt/acme.json ]; then
+            touch traefik/letsencrypt/acme.json
+            chmod 600 traefik/letsencrypt/acme.json
+          fi
 
     - name: Deploy on target server
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            cd ${{ secrets.DEPLOY_TARGET }}
-            docker compose pull
-            if [ "${{ github.event.inputs.force_recreate }}" = "true" ]; then
-              docker compose up -d --force-recreate
-            else
-              docker compose up -d
-            fi
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        script: |
+          cd ${{ secrets.DEPLOY_TARGET }}
+          docker compose pull
+          if [ "${{ github.event.inputs.force_recreate }}" = "true" ]; then
+            docker compose up -d --force-recreate
+          else
+            docker compose up -d
+          fi
