@@ -55,18 +55,18 @@ services:
       - "traefik.enable=true"
       
       # VLESS路由配置
-      - "traefik.http.routers.xray-vless.rule=Host(`${XRAY_DOMAIN}`) && PathPrefix(`${XRAY_VLESS_PATH:-/vless}`)"
+      - "traefik.http.routers.xray-vless.rule=Host(`${XRAY_DOMAIN}`) && PathPrefix(`/vless`)"
       - "traefik.http.routers.xray-vless.entrypoints=websecure"
       - "traefik.http.routers.xray-vless.tls.certresolver=cloudflare"
       - "traefik.http.routers.xray-vless.service=xray-vless"
-      - "traefik.http.services.xray-vless.loadbalancer.server.port=${XRAY_VLESS_PORT:-10086}"
+      - "traefik.http.services.xray-vless.loadbalancer.server.port=10086"
       
       # VMess路由配置
-      - "traefik.http.routers.xray-vmess.rule=Host(`${XRAY_DOMAIN}`) && PathPrefix(`${XRAY_VMESS_PATH:-/vmess}`)"
+      - "traefik.http.routers.xray-vmess.rule=Host(`${XRAY_DOMAIN}`) && PathPrefix(`/vmess`)"
       - "traefik.http.routers.xray-vmess.entrypoints=websecure"
       - "traefik.http.routers.xray-vmess.tls.certresolver=cloudflare"
       - "traefik.http.routers.xray-vmess.service=xray-vmess"
-      - "traefik.http.services.xray-vmess.loadbalancer.server.port=${XRAY_VMESS_PORT:-10087}"
+      - "traefik.http.services.xray-vmess.loadbalancer.server.port=10087"
       
       # # WebSocket升级头和Cloudflare真实IP中间件
       # - "traefik.http.routers.xray-vless.middlewares=xray-headers,cloudflare-realip"
@@ -79,6 +79,34 @@ services:
       # - "traefik.http.middlewares.cloudflare-realip.headers.customrequestheaders.X-Forwarded-Proto=https"
       # - "traefik.http.middlewares.cloudflare-realip.headers.customrequestheaders.X-Real-IP="
       # - "traefik.http.middlewares.cloudflare-realip.headers.customrequestheaders.X-Forwarded-For="
+
+  # X-UI 管理面板
+  x-ui:
+    image: alireza7/x-ui:latest
+    container_name: x-ui
+    restart: unless-stopped
+    # ports:
+    #   - "${XUI_PORT:-54321}:54321"  # X-UI管理端口
+    volumes:
+      - ./x-ui/db:/etc/x-ui
+    environment:
+      - TZ=${TZ:-UTC}
+    networks:
+      - common_network
+    labels:
+      # 启用traefik
+      - "traefik.enable=true"
+      
+      # X-UI管理面板路由配置
+      - "traefik.http.routers.x-ui.rule=Host(`${XRAY_DOMAIN}`) && PathPrefix(`${XUI_PATH:-/xui}`)"
+      - "traefik.http.routers.x-ui.entrypoints=websecure"
+      - "traefik.http.routers.x-ui.tls.certresolver=cloudflare"
+      - "traefik.http.routers.x-ui.service=x-ui"
+      - "traefik.http.services.x-ui.loadbalancer.server.port=54321"
+      
+      # X-UI路径重写中间件
+      - "traefik.http.routers.x-ui.middlewares=x-ui-stripprefix"
+      - "traefik.http.middlewares.x-ui-stripprefix.stripprefix.prefixes=/xui"
 
 networks:
   common_network:

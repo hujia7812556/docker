@@ -18,9 +18,10 @@
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "ws",
-        "wsSettings": {
-          "path": "${XRAY_VLESS_PATH:-/vless}"
+        "network": "xhttp",
+        "xhttpSettings": {
+          "path": "${XRAY_VLESS_PATH:-/vless}",
+          "mode": "auto"
         }
       }
     },
@@ -36,9 +37,10 @@
         ]
       },
       "streamSettings": {
-        "network": "ws",
-        "wsSettings": {
-          "path": "${XRAY_VMESS_PATH:-/vmess}"
+        "network": "xhttp",
+        "xhttpSettings": {
+          "path": "${XRAY_VMESS_PATH:-/vmess}",
+          "mode": "auto"
         }
       }
     }
