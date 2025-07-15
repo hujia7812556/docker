@@ -34,19 +34,14 @@ jobs:
             $DOCKER_COMPOSE_ENV
             EOF
 
-    - name: Generate xray config file
+    - name: Generate Xray config file
+      env:
+        XRAY_CONFIG: ${{ secrets.XRAY_CONFIG }}
       run: |
-        # 使用envsubst根据环境变量生成xray配置文件
-        mkdir -p common/${{ github.event.inputs.server }}/xray
-        envsubst < common/${{ github.event.inputs.server }}/xray/config.json.template > common/${{ github.event.inputs.server }}/xray/config.json
-        
-        # 验证配置文件生成成功
-        if [ ! -f "common/${{ github.event.inputs.server }}/xray/config.json" ]; then
-          echo "❌ 错误：Xray配置文件生成失败！"
-          exit 1
-        fi
-        
-        echo "✅ Xray配置文件生成成功"
+            mkdir -p common/${{ github.event.inputs.server }}/xray
+            cat > common/${{ github.event.inputs.server }}/xray/config.json <<EOF
+            $XRAY_CONFIG
+            EOF
 
     - name: Create target directory on remote server
       uses: appleboy/ssh-action@v0.1.10
