@@ -1,0 +1,117 @@
+name: Deploy Common Service
+
+on:
+  workflow_dispatch:
+    inputs:
+      server:
+        description: '选择部署服务器'
+        required: true
+        type: choice
+        options:
+          - tencent-lg-sg
+      force_recreate:
+        description: '是否强制重新创建容器'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.server }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Generate docker .env file from secrets
+      env:
+        DOCKER_COMPOSE_ENV: ${{ secrets.DOCKER_COMPOSE_ENV }}
+      run: |
+            # 这样可以正确输出里面的$符号
+            mkdir -p common/${{ github.event.inputs.server }}
+            cat > common/${{ github.event.inputs.server }}/.env <<EOF
+            $DOCKER_COMPOSE_ENV
+            EOF
+
+    - name: Generate xray config file
+      run: |
+        # 使用envsubst根据环境变量生成xray配置文件
+        mkdir -p common/${{ github.event.inputs.server }}/xray
+        envsubst < common/${{ github.event.inputs.server }}/xray/config.json.template > common/${{ github.event.inputs.server }}/xray/config.json
+        
+        # 验证配置文件生成成功
+        if [ ! -f "common/${{ github.event.inputs.server }}/xray/config.json" ]; then
+          echo "❌ 错误：Xray配置文件生成失败！"
+          exit 1
+        fi
+        
+        echo "✅ Xray配置文件生成成功"
+
+    - name: Create target directory on remote server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            mkdir -p ${{ secrets.DEPLOY_TARGET }}
+
+    - name: Backup and clean old backups on target server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_TARGET }}
+            BACKUP_ROOT="${{ secrets.DEPLOY_TARGET }}_backups"
+            mkdir -p "$BACKUP_ROOT"
+            BACKUP_DIR="$BACKUP_ROOT/backup_$(date +%Y%m%d_%H%M%S)"
+            mkdir -p "$BACKUP_DIR"
+            # 备份整个目标目录（不包括备份目录自身）
+            cp -a ./ "$BACKUP_DIR/"
+            # 清理7天前的备份
+            find "$BACKUP_ROOT" -maxdepth 1 -type d -name "backup_*" -mtime +7 -exec rm -rf {} \;
+
+    - name: Sync prod directory to target server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT || 22 }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "common/${{ github.event.inputs.server }}/*,common/${{ github.event.inputs.server }}/.env"
+          target: "${{ secrets.DEPLOY_TARGET }}"
+          strip_components: 2
+
+    - name: Ensure acme.json exists on target server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_TARGET }}
+            mkdir -p traefik/letsencrypt
+            if [ ! -f traefik/letsencrypt/acme.json ]; then
+              touch traefik/letsencrypt/acme.json
+              chmod 600 traefik/letsencrypt/acme.json
+            fi
+
+    - name: Deploy on target server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd ${{ secrets.DEPLOY_TARGET }}
+            docker compose pull
+            if [ "${{ github.event.inputs.force_recreate }}" = "true" ]; then
+              docker compose up -d --force-recreate
+            else
+              docker compose up -d
+            fi
