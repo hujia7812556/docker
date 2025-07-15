@@ -8,7 +8,7 @@ on:
         required: true
         type: choice
         options:
-          - tencent-lg-sg
+          - tencent-lh-sg
       force_recreate:
         description: '是否强制重新创建容器'
         required: false
