@@ -45,7 +45,7 @@ services:
     #   - "${XRAY_VMESS_PORT:-10087}:10087"  # VMess端口
     volumes:
       - ./xray/config.json:/etc/xray/config.json:ro
-      # - ./xray/logs:/var/log/xray
+      - ./xray/logs:/var/log/xray
     environment:
       - TZ=${TZ:-UTC}
     networks:
