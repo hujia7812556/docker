@@ -88,7 +88,7 @@ services:
     # ports:
     #   - "${XUI_PORT:-54321}:54321"  # X-UI管理端口
     volumes:
-      - ./x-ui/db:/etc/x-ui
+      - xui_data:/etc/x-ui
     environment:
       - TZ=${TZ:-UTC}
     networks:
@@ -114,3 +114,4 @@ networks:
 
 volumes:
   traefik_data:
+  xui_data:
