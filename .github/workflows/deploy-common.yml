@@ -104,7 +104,7 @@ jobs:
         key: ${{ secrets.DEPLOY_SSH_KEY }}
         script: |
           cd ${{ secrets.DEPLOY_TARGET }}
-          docker compose pull
+          docker compose pull --no-cache
           if [ "${{ github.event.inputs.force_recreate }}" = "true" ]; then
             docker compose up -d --force-recreate
           else
