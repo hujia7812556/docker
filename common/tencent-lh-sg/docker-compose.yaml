@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./postgres_init:/docker-entrypoint-initdb.d
+      - ./postgres/init:/docker-entrypoint-initdb.d
     networks:
       - common_network
     restart: unless-stopped
@@ -142,4 +142,7 @@ networks:
     driver: bridge
 
 volumes:
+  postgres_data:
+  redis_data:
+  consul_data:
   traefik_data:
