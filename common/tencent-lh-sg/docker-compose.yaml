@@ -139,6 +139,7 @@ services:
 networks:
   common_network:
     driver: bridge
+    name: common_network
 
 volumes:
   postgres_data:
