@@ -25,7 +25,7 @@ http:
       headers:
         customRequestHeaders:
           X-Forwarded-Proto: "http"
-          X-Forwarded-Host: "sign.localhost"
+          X-Forwarded-Host: "sign.jerehu.local"
         customResponseHeaders:
           X-Frame-Options: "SAMEORIGIN"
           X-Content-Type-Options: "nosniff"
