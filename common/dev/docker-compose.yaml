@@ -1,0 +1,66 @@
+services:
+  consul:
+    image: consul:1.15
+    container_name: consul
+    ports:
+      - "${CONSUL_HTTP_PORT}:8500" # Consul Web UI 和 HTTP API
+      - "${CONSUL_DNS_PORT}:8600/udp" # Consul DNS
+    volumes:
+      - consul_data:/consul/data
+      - ./consul/policy:/consul/policy
+      - ./consul/create-consul-tokens.sh:/consul/create-consul-tokens.sh
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+      - CONSUL_LOCAL_CONFIG={"acl":{"enabled":true,"default_policy":"allow","down_policy":"extend-cache","tokens":{"master":"${CONSUL_MASTER_TOKEN}"}}}
+    command: agent -server -bootstrap-expect=1 -bootstrap -ui -client=0.0.0.0
+    networks:
+      - common_network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.consul.rule=Host(`${CONSUL_HOST}`)"
+      - "traefik.http.routers.consul.entrypoints=web"
+      - "traefik.http.services.consul.loadbalancer.server.port=8500"
+      - "traefik.http.routers.consul.middlewares=consul-auth"
+      - "traefik.http.middlewares.consul-auth.forwardauth.address=http://host.docker.internal:3000/api/auth"
+      - "traefik.http.middlewares.consul-auth.forwardauth.trustforwardheader=true"
+      - "traefik.http.middlewares.consul-auth.forwardauth.authResponseHeaders=Cookie,Set-Cookie,Authorization,X-User-Id,X-User-Email,X-User-Name"
+      - "traefik.http.middlewares.consul-auth.forwardauth.authRequestHeaders=Cookie,Authorization,X-Forwarded-For,X-Forwarded-Proto,X-Forwarded-Host,X-Forwarded-Uri,X-Real-IP,User-Agent,Accept,Accept-Language,Accept-Encoding,Referer"
+
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    command:
+      - --api.insecure=true
+      - --api.dashboard=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.file.directory=/etc/traefik/dynamic
+      - --providers.file.watch=true
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --providers.consulcatalog=true
+      - --providers.consulcatalog.endpoint.address=consul:8500
+      - --providers.consulcatalog.endpoint.token=${CONSUL_SERVICE_REGISTRATION_TOKEN}
+      - --providers.consulcatalog.exposedbydefault=false
+      - --accesslog=true
+    ports:
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
+      - "8080:8080" # Traefik Dashboard
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/dynamic:/etc/traefik/dynamic:ro
+    networks:
+      - common_network
+    restart: unless-stopped
+    depends_on:
+      - consul
+
+networks:
+  common_network:
+    driver: bridge
+    name: common_network
+
+volumes:
+  consul_data:

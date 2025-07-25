@@ -1,0 +1,31 @@
+# Traefik 动态配置文件 - 认证路由
+# 配置 sign.localhost 指向 localhost:3000
+
+http:
+  routers:
+    # sign.localhost 路由配置
+    sign-auth:
+      rule: "Host(`sign.jerehu.local`)"
+      entrypoints:
+        - "web"
+      service: "sign-auth-service"
+      middlewares:
+        - "sign-auth-headers"
+
+  services:
+    # sign.localhost 服务配置
+    sign-auth-service:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:3000"
+
+  middlewares:
+    # 添加必要的头部信息
+    sign-auth-headers:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Proto: "http"
+          X-Forwarded-Host: "sign.localhost"
+        customResponseHeaders:
+          X-Frame-Options: "SAMEORIGIN"
+          X-Content-Type-Options: "nosniff"
