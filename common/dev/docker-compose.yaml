@@ -56,6 +56,16 @@ services:
     restart: unless-stopped
     depends_on:
       - consul
+  redis:
+    image: redis:8.2-alpine # 使用官方 Alpine 版本（轻量级）
+    container_name: redis
+    ports:
+      - "${REDIS_PORT}:6379" # 默认 Redis 端口映射
+    volumes:
+      - redis_data:/data # 持久化数据存储
+    networks:
+      - common_network
+    restart: unless-stopped
 
 networks:
   common_network:
@@ -64,3 +74,4 @@ networks:
 
 volumes:
   consul_data:
+  redis_data:
