@@ -92,9 +92,9 @@ services:
     image: teddysun/xray:latest
     container_name: xray
     restart: unless-stopped
-    # ports:
-    #   - "${XRAY_VLESS_PORT:-10086}:10086"  # VLESS端口
-    #   - "${XRAY_VMESS_PORT:-10087}:10087"  # VMess端口
+    ports:
+      - "${XRAY_VLESS_PORT:-10086}:10086"  # VLESS端口
+      - "${XRAY_VMESS_PORT:-10087}:10087"  # VMess端口
     volumes:
       - ./xray/config.json:/etc/xray/config.json:ro
     environment:
@@ -111,14 +111,14 @@ services:
       - "traefik.enable=true"
       
       # VLESS路由配置
-      - "traefik.http.routers.xray-vless.rule=Host(`${XRAY_DOMAIN}`) && PathPrefix(`/vless`)"
+      - "traefik.http.routers.xray-vless.rule=Host(`${XRAY_DOMAIN}`, `${XRAY_DOMAIN_2:-${XRAY_DOMAIN}}`) && PathPrefix(`/vless`)"
       - "traefik.http.routers.xray-vless.entrypoints=websecure"
       - "traefik.http.routers.xray-vless.tls.certresolver=cloudflare"
       - "traefik.http.routers.xray-vless.service=xray-vless"
       - "traefik.http.services.xray-vless.loadbalancer.server.port=10086"
       
       # VMess路由配置
-      - "traefik.http.routers.xray-vmess.rule=Host(`${XRAY_DOMAIN}`) && PathPrefix(`/vmess`)"
+      - "traefik.http.routers.xray-vmess.rule=Host(`${XRAY_DOMAIN}`, `${XRAY_DOMAIN_2:-${XRAY_DOMAIN}}`) && PathPrefix(`/vmess`)"
       - "traefik.http.routers.xray-vmess.entrypoints=websecure"
       - "traefik.http.routers.xray-vmess.tls.certresolver=cloudflare"
       - "traefik.http.routers.xray-vmess.service=xray-vmess"
