@@ -1,0 +1,13 @@
+services:
+  paseo-relay:
+    container_name: paseo-relay
+    build:
+      context: https://github.com/getpaseo/paseo-relay.git#main
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PASEO_RELAY_HOST: 0.0.0.0
+      PASEO_RELAY_PORT: 4000
+      PASEO_RELAY_DRAIN: "false"
+    ports:
+      - "127.0.0.1:4000:4000"
