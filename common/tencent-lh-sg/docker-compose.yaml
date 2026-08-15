@@ -95,6 +95,8 @@ services:
     ports:
       - "${XRAY_VLESS_PORT:-10086}:10086"  # VLESS端口
       - "${XRAY_VMESS_PORT:-10087}:10087"  # VMess端口
+      # REALITY 必须由客户端直连，不能经过 Traefik 或 Cloudflare
+      - "${XRAY_REALITY_PORT:-10088}:10088"
     volumes:
       - ./xray/config.json:/etc/xray/config.json:ro
     environment:

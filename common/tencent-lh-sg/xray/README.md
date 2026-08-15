@@ -29,6 +29,7 @@ TRAEFIK_ACME_EMAIL=your-email@example.com   # Let's Encrypt 邮箱
 XRAY_UUID=your-uuid-here                    # 生成的 UUID
 XRAY_VLESS_PORT=10086                       # VLESS 端口
 XRAY_VMESS_PORT=10087                       # VMess 端口
+XRAY_REALITY_PORT=10088                      # VLESS-REALITY 直连端口（宿主机和容器内一致）
 XRAY_VLESS_PATH=/vless                      # VLESS 路径
 XRAY_VMESS_PATH=/vmess                      # VMess 路径
 
@@ -91,10 +92,24 @@ docker-compose logs -f xray
 - 地址：你的域名
 - 端口：443（HTTPS）
 - UUID：配置文件中设置的 UUID
-- 流控：xtls-rprx-vision
+- 流控：留空
 - 传输协议：WebSocket
 - 路径：/vless
 - TLS：开启
+
+### VLESS-REALITY 配置
+- 协议：VLESS
+- 地址：服务器真实 IP 或未开启 Cloudflare 代理的域名
+- 端口：`XRAY_REALITY_PORT`（默认 `10088`）
+- UUID：与 VLESS 配置相同
+- 流控：`xtls-rprx-vision`
+- 传输协议：TCP
+- 安全：REALITY
+- SNI：`www.microsoft.com`
+- 公钥：`f1RTKn7bocEOb9GWwtK3cHYdXoPCvhg6rQdv3ekaikc`
+- Short ID：`6ba85179c3842d50`
+
+REALITY 不经过 Traefik 或 Cloudflare；需要在服务器防火墙中直接放行该端口。WebSocket 入站不支持 `xtls-rprx-vision`，上面的 VLESS-WS 应保持空流控。
 
 ### VMess 配置
 - 协议：VMess
