@@ -1,0 +1,266 @@
+#!/usr/bin/env bash
+# 管理多项目 worktree 的 Nginx 路由、Composer 依赖和前端 Vite 进程。
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+NGINX_CONF_DIR="$(cd "${ROOT_DIR}/../mynginx/conf" && pwd)"
+GENERATED_CONF="${NGINX_CONF_DIR}/zz-worktrees.conf"
+STATE_DIR="${ROOT_DIR}/runtime/worktree-dev"
+COMPOSE_FILE="${ROOT_DIR}/docker-compose.yml"
+HOST_WORKSPACE_ROOT="${HOST_WORKSPACE_ROOT:-${HOME}/myproject/xlzy}"
+HOST_CODEX_ROOT="${HOME}/.codex/worktrees"
+
+# shellcheck source=../config/worktree-projects.sh
+source "${ROOT_DIR}/config/worktree-projects.sh"
+
+usage() {
+  cat <<'EOF'
+用法：
+  worktree-dev up <项目标识> <任务名> --api <后端路径> [--lib <库名>=<路径>]... [--web <前端路径> --port <端口>]
+  worktree-dev down <项目标识> <任务名>
+  worktree-dev list
+  worktree-dev cli <项目标识> <任务名> <yii 参数...>
+EOF
+}
+
+die() { echo "错误：$*" >&2; exit 1; }
+info() { echo "==> $*"; }
+
+compose() { docker compose -f "${COMPOSE_FILE}" "$@"; }
+
+valid_name() { [[ "$1" =~ ^[a-z0-9]+([a-z0-9-]*[a-z0-9]+)?$ ]]; }
+
+canonical_path() {
+  [ -d "$1" ] || die "目录不存在：$1"
+  (cd "$1" && pwd -P)
+}
+
+# 将已挂载的宿主机路径映射为容器路径，拒绝任意未挂载路径。
+container_path() {
+  local path
+  path="$(canonical_path "$1")"
+  case "$path" in
+    "${HOST_CODEX_ROOT}"/*) printf '/worktrees/codex/%s\n' "${path#"${HOST_CODEX_ROOT}/"}" ;;
+    "${HOST_WORKSPACE_ROOT}"/*) printf '/www/%s\n' "${path#"${HOST_WORKSPACE_ROOT}/"}" ;;
+    *) die "路径未挂载到容器：$path" ;;
+  esac
+}
+
+state_file() { printf '%s/%s--%s.state\n' "$STATE_DIR" "$1" "$2"; }
+
+load_state() {
+  local file
+  file="$(state_file "$1" "$2")"
+  [ -f "$file" ] || die "任务未注册：$1/$2"
+  # 状态文件仅由本脚本使用 printf %q 生成。
+  # shellcheck disable=SC1090
+  source "$file"
+}
+
+project_has_library() {
+  local project="$1" library="$2" item
+  for item in $(project_libraries "$project"); do
+    [ "$item" = "$library" ] && return 0
+  done
+  return 1
+}
+
+# 任务名和库名已由注册表校验，只动态访问脚本自身维护的变量。
+set_library_path() {
+  local library="$1" path="$2"
+  eval "LIB_PATH_${library}=\$(printf '%q' \"\$path\")"
+}
+
+get_library_path() {
+  local library="$1" value
+  eval "value=\${LIB_PATH_${library}:-}"
+  printf '%s\n' "$value"
+}
+
+library_state_name() {
+  case "$1" in
+    tkslib) printf '%s\n' 'LIB_TKSLIB' ;;
+    mcnlib) printf '%s\n' 'LIB_MCNLIB' ;;
+    cmclib) printf '%s\n' 'LIB_CMCLIB' ;;
+    *) die "未知依赖库：$1" ;;
+  esac
+}
+
+write_state() {
+  local project="$1" task="$2" api_host="$3" api_container="$4" web_path="$5" web_port="$6"
+  shift 6
+  local file tmp library path
+  file="$(state_file "$project" "$task")"
+  tmp="${file}.tmp"
+  {
+    printf 'PROJECT=%q\nTASK=%q\nAPI_HOST=%q\nAPI_CONTAINER=%q\nWEB_PATH=%q\nWEB_PORT=%q\n' \
+      "$project" "$task" "$api_host" "$api_container" "$web_path" "$web_port"
+    for library in $(project_libraries "$project"); do
+      path="$(get_library_path "$library")"
+      path="${path:-$(library_fallback "$library")}" 
+      printf '%s=%q\n' "$(library_state_name "$library")" "$path"
+    done
+  } > "$tmp"
+  mv "$tmp" "$file"
+}
+
+generate_nginx_conf() {
+  local tmp state project task api_container library env path var
+  tmp="$(mktemp "${GENERATED_CONF}.XXXXXX")"
+  {
+    echo '# 此文件由 scripts/worktree-dev 自动生成，请勿手工编辑。'
+    for state in "$STATE_DIR"/*.state; do
+      [ -f "$state" ] || continue
+      unset PROJECT TASK API_HOST API_CONTAINER WEB_PATH WEB_PORT
+      # shellcheck disable=SC1090
+      source "$state"
+      project="$PROJECT"; task="$TASK"; api_container="$API_CONTAINER"
+      cat <<EOF
+server {
+    listen 80;
+    server_name ${project}--${task}.localtest.me;
+    root ${api_container}/web;
+    index index.php;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location ~ \\.php\$ {
+        include fastcgi_params;
+        fastcgi_pass php:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        fastcgi_param VENDOR_PATH /www/vendor;
+EOF
+      for library in $(project_libraries "$project"); do
+        env="$(library_env "$library")"
+        var="$(library_state_name "$library")"
+        eval "path=\${${var}:-}"
+        path="${path:-$(library_fallback "$library")}" 
+        printf '        fastcgi_param %s %s;\n' "$env" "$path"
+      done
+      cat <<'EOF'
+    }
+}
+
+EOF
+    done
+  } > "$tmp"
+  printf '%s\n' "$tmp"
+}
+
+reload_nginx() {
+  local candidate backup had_config=0
+  candidate="$(generate_nginx_conf)"
+  backup="${GENERATED_CONF}.bak"
+  if [ -f "$GENERATED_CONF" ]; then cp "$GENERATED_CONF" "$backup"; had_config=1; fi
+  mv "$candidate" "$GENERATED_CONF"
+  if ! compose exec -T nginx nginx -t; then
+    if [ "$had_config" -eq 1 ]; then mv "$backup" "$GENERATED_CONF"; else rm -f "$GENERATED_CONF"; fi
+    die 'Nginx 配置校验失败，已恢复上一份配置'
+  fi
+  rm -f "$backup"
+  compose exec -T nginx nginx -s reload
+}
+
+start_web() {
+  local project="$1" task="$2" web_path="$3" port="$4" api_domain env_file command pid_file
+  [ -f "${web_path}/package.json" ] || die "前端目录不是 Node 项目：$web_path"
+  [[ "$port" =~ ^[1-9][0-9]{3,4}$ ]] || die "无效 Vite 端口：$port"
+  api_domain="http://${project}--${task}.localtest.me:8080"
+  env_file="${web_path}/.env.local"
+  if [ ! -e "$env_file" ]; then
+    printf '# 由 worktree-dev 生成，可安全删除。\nBASE_API_PROXY_DOMAIN=%s\n' "$api_domain" > "$env_file"
+  elif grep -q '^# 由 worktree-dev 生成' "$env_file"; then
+    printf '# 由 worktree-dev 生成，可安全删除。\nBASE_API_PROXY_DOMAIN=%s\n' "$api_domain" > "$env_file"
+  else
+    info "保留已有 ${env_file}，启动进程时仍会注入 API 地址"
+  fi
+  command='pnpm'
+  command -v pnpm >/dev/null 2>&1 || command='npm'
+  pid_file="$(state_file "$project" "$task").vite.pid"
+  (cd "$web_path" && nohup env BASE_API_PROXY_DOMAIN="$api_domain" "$command" exec vite --host 0.0.0.0 --port "$port" > "${web_path}/.worktree-dev-vite.log" 2>&1 & echo $! > "$pid_file")
+}
+
+cmd_up() {
+  local project="$1" task="$2"; shift 2
+  local api='' web='' port='' option library value path api_host api_container
+  [ -n "$(project_repository "$project" 2>/dev/null || true)" ] || die "未知项目：$project"
+  valid_name "$task" || die "任务名只能包含小写字母、数字和连字符"
+  while [ "$#" -gt 0 ]; do
+    option="$1"; shift
+    case "$option" in
+      --api) api="${1:-}"; shift ;;
+      --lib)
+        value="${1:-}"; shift
+        library="${value%%=*}"; path="${value#*=}"
+        [ "$library" != "$value" ] && [ -n "$path" ] || die '--lib 格式必须为 库名=路径'
+        project_has_library "$project" "$library" || die "项目 $project 未声明依赖库：$library"
+        set_library_path "$library" "$(container_path "$path")"
+        ;;
+      --web) web="${1:-}"; shift ;;
+      --port) port="${1:-}"; shift ;;
+      *) die "未知参数：$option" ;;
+    esac
+  done
+  [ -n "$api" ] || die '缺少 --api'
+  [ -z "$web" ] || [ -n "$port" ] || die '使用 --web 时必须同时指定 --port'
+  api_host="$(canonical_path "$api")"
+  [ -f "${api_host}/web/index.php" ] || die "后端目录不是 Yii Web 项目：$api_host"
+  [ "$(basename "$api_host")" = "$(project_repository "$project")" ] || die "后端目录名必须为 $(project_repository "$project")"
+  api_container="$(container_path "$api_host")"
+  mkdir -p "$STATE_DIR"
+  write_state "$project" "$task" "$api_host" "$api_container" "$web" "$port"
+  reload_nginx
+  if [ -n "$web" ]; then start_web "$project" "$task" "$(canonical_path "$web")" "$port"; fi
+  info "已注册：http://${project}--${task}.localtest.me:8080"
+}
+
+cmd_down() {
+  local project="$1" task="$2" file pid_file
+  load_state "$project" "$task"
+  file="$(state_file "$project" "$task")"; pid_file="${file}.vite.pid"
+  if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then kill "$(cat "$pid_file")"; fi
+  rm -f "$pid_file" "$file"
+  reload_nginx
+  info "已移除：$project/$task"
+}
+
+cmd_list() {
+  local file
+  printf '%-16s %-20s %-46s %s\n' '项目' '任务' '后端路径' '前端端口'
+  for file in "$STATE_DIR"/*.state; do
+    [ -f "$file" ] || continue
+    unset PROJECT TASK API_HOST WEB_PORT
+    # shellcheck disable=SC1090
+    source "$file"
+    printf '%-16s %-20s %-46s %s\n' "$PROJECT" "$TASK" "$API_HOST" "${WEB_PORT:--}"
+  done
+}
+
+cmd_cli() {
+  local project="$1" task="$2"; shift 2
+  load_state "$project" "$task"
+  local args=(exec -T -e VENDOR_PATH=/www/vendor) library env var path
+  for library in $(project_libraries "$PROJECT"); do
+    env="$(library_env "$library")"; var="$(library_state_name "$library")"; eval "path=\${${var}:-}"; path="${path:-$(library_fallback "$library")}" 
+    args+=(-e "${env}=${path}")
+  done
+  args+=(sh -lc "cd '${API_CONTAINER}' && exec php yii-test \"\$@\"" -- "$@")
+  compose "${args[@]}"
+}
+
+main() {
+  local command="${1:-}"; shift || true
+  case "$command" in
+    up) [ "$#" -ge 2 ] || { usage; exit 1; }; cmd_up "$@" ;;
+    down) [ "$#" -eq 2 ] || { usage; exit 1; }; cmd_down "$@" ;;
+    list) [ "$#" -eq 0 ] || { usage; exit 1; }; cmd_list ;;
+    cli) [ "$#" -ge 3 ] || { usage; exit 1; }; cmd_cli "$@" ;;
+    *) usage; exit 1 ;;
+  esac
+}
+
+main "$@"

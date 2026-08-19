@@ -1,0 +1,75 @@
+#version: '2.2.3'
+
+services:
+
+  nginx:
+    build:
+      context: ../mynginx/
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+      # - "80:80"
+    container_name: nginx-snw-tk
+    volumes:
+      - ../../../xlzy:/usr/share/nginx/html
+      - ${HOME}/.codex/worktrees:/worktrees/codex:cached
+      - ../mynginx/conf:/etc/nginx/conf.d
+      - ../mynginx/logs:/var/log/nginx
+    networks:
+      tk-network:
+        ipv4_address: 172.20.0.2
+  php:
+    build:
+      context: ../myphp/
+      dockerfile: Dockerfile
+    ports:
+      - "9002:9000"
+    container_name: php-snw-tk
+    volumes:
+      - ../../../xlzy:/www:cached
+      - ${HOME}/.codex/worktrees:/worktrees/codex:cached
+      - ./conf/myconf.ini:/usr/local/etc/php/conf.d/myconf.ini:ro
+      - ./scripts/php-start.sh:/usr/local/bin/php-start.sh:ro
+      - ~/.claude:/root/.claude
+    command:
+      - /bin/sh
+      - -lc
+      - |
+        apt-get update && apt-get install -y socat || exit 1
+        socat TCP-LISTEN:6379,fork,reuseaddr,bind=127.0.0.1,tcpwrap=2 TCP:redis-snw:6379,keepalive,keepidle=10,keepintvl=10,keepcnt=2 &
+        exec /usr/local/bin/php-start.sh
+    depends_on:
+      nginx:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    extra_hosts:
+      - "redis-snw:172.20.0.4"
+      - "affiliate-api.tiktoksaas.org:172.20.0.2"
+      - "dev-fe.affiliate-api.tiktoksaas.com:172.20.0.2"
+      - "rm-7xv7q5x6smix4mr79xo.mysql.rds.aliyuncs.com:8.134.21.158"
+    networks:
+      tk-network:
+        ipv4_address: 172.20.0.3
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    container_name: redis-snw
+    volumes:
+      - ../redis/data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      tk-network:
+        ipv4_address: 172.20.0.4
+
+networks:
+  tk-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
