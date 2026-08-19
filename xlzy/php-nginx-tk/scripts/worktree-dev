@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 管理多项目 worktree 的 Nginx 路由、Composer 依赖和前端 Vite 进程。
+# 管理多个 Codex worktree 的 API 路由、依赖库注册和显式绑定。
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -7,260 +7,333 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 NGINX_CONF_DIR="$(cd "${ROOT_DIR}/../mynginx/conf" && pwd)"
 GENERATED_CONF="${NGINX_CONF_DIR}/zz-worktrees.conf"
 STATE_DIR="${ROOT_DIR}/runtime/worktree-dev"
+API_DIR="${STATE_DIR}/apis"; LIB_DIR="${STATE_DIR}/libraries"; BIND_DIR="${STATE_DIR}/bindings"
 COMPOSE_FILE="${ROOT_DIR}/docker-compose.yml"
 HOST_WORKSPACE_ROOT="${HOST_WORKSPACE_ROOT:-${HOME}/myproject/xlzy}"
 HOST_CODEX_ROOT="${HOME}/.codex/worktrees"
-
-# shellcheck source=../config/worktree-projects.sh
 source "${ROOT_DIR}/config/worktree-projects.sh"
-
-usage() {
-  cat <<'EOF'
-用法：
-  worktree-dev up <项目标识> <任务名> --api <后端路径> [--lib <库名>=<路径>]... [--web <前端路径> --port <端口>]
-  worktree-dev down <项目标识> <任务名>
-  worktree-dev list
-  worktree-dev cli <项目标识> <任务名> <yii 参数...>
-EOF
-}
+mkdir -p "$API_DIR" "$LIB_DIR" "$BIND_DIR"
 
 die() { echo "错误：$*" >&2; exit 1; }
 info() { echo "==> $*"; }
-
-compose() { docker compose -f "${COMPOSE_FILE}" "$@"; }
-
+compose() { docker compose -f "$COMPOSE_FILE" "$@"; }
 valid_name() { [[ "$1" =~ ^[a-z0-9]+([a-z0-9-]*[a-z0-9]+)?$ ]]; }
 
-canonical_path() {
-  [ -d "$1" ] || die "目录不存在：$1"
-  (cd "$1" && pwd -P)
+# 仅在交互终端启用颜色，保证管道和脚本调用得到纯文本。
+init_output_style() {
+  STYLE_RESET='' STYLE_TITLE='' STYLE_TASK='' STYLE_OK='' STYLE_MUTED=''
+  if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+    STYLE_RESET=$'\033[0m'
+    STYLE_TITLE=$'\033[1;36m'
+    STYLE_TASK=$'\033[1;33m'
+    STYLE_OK=$'\033[1;32m'
+    STYLE_MUTED=$'\033[2m'
+  fi
 }
 
-# 将已挂载的宿主机路径映射为容器路径，拒绝任意未挂载路径。
+# 将当前用户目录缩写为 ~，减少本地 worktree 路径的视觉噪音。
+short_host_path() {
+  case "$1" in
+    "$HOME") printf '~\n' ;;
+    "$HOME"/*) printf '~/%s\n' "${1#"$HOME"/}" ;;
+    *) printf '%s\n' "$1" ;;
+  esac
+}
+canonical_path() { [ -d "$1" ] || die "目录不存在：$1"; (cd "$1" && pwd -P); }
 container_path() {
-  local path
-  path="$(canonical_path "$1")"
+  local path; path="$(canonical_path "$1")"
   case "$path" in
     "${HOST_CODEX_ROOT}"/*) printf '/worktrees/codex/%s\n' "${path#"${HOST_CODEX_ROOT}/"}" ;;
     "${HOST_WORKSPACE_ROOT}"/*) printf '/www/%s\n' "${path#"${HOST_WORKSPACE_ROOT}/"}" ;;
     *) die "路径未挂载到容器：$path" ;;
   esac
 }
-
-state_file() { printf '%s/%s--%s.state\n' "$STATE_DIR" "$1" "$2"; }
-
-load_state() {
-  local file
-  file="$(state_file "$1" "$2")"
-  [ -f "$file" ] || die "任务未注册：$1/$2"
-  # 状态文件仅由本脚本使用 printf %q 生成。
-  # shellcheck disable=SC1090
-  source "$file"
+api_state() { printf '%s/%s/%s.state\n' "$API_DIR" "$1" "$2"; }
+lib_state() { printf '%s/%s/%s.state\n' "$LIB_DIR" "$1" "$2"; }
+bind_state() { printf '%s/%s/%s.state\n' "$BIND_DIR" "$1" "$2"; }
+load_file() { [ -f "$1" ] || die "注册信息不存在：$1"; source "$1"; }
+project_has_library() { local x; for x in $(project_libraries "$1"); do [ "$x" = "$2" ] && return 0; done; return 1; }
+library_key() { case "$1" in tkslib) echo TKSLIB;; mcnlib) echo MCNLIB;; cmclib) echo CMCLIB;; *) die "未知库：$1";; esac; }
+usage() { cat <<'EOF'
+用法：
+  worktree-dev api-up <项目> <API工作区ID> --api <路径> [--task <任务名>]
+  worktree-dev set-task <项目> <API工作区ID或任务名> <任务名>
+  worktree-dev lib-up <库名> <库工作区ID> --path <路径> [--task <任务名>]
+  worktree-dev bind <项目> <API工作区ID或任务名> --lib <库名>=<库工作区ID或任务名> [--lib ...]
+  worktree-dev api-down <项目> <API工作区ID或任务名>
+  worktree-dev lib-down <库名> <库工作区ID或任务名>
+  worktree-dev reload
+  worktree-dev list
+  worktree-dev cli <项目> <API工作区ID或任务名> <yii 参数...>
+EOF
 }
 
-project_has_library() {
-  local project="$1" library="$2" item
-  for item in $(project_libraries "$project"); do
-    [ "$item" = "$library" ] && return 0
+write_api_state() {
+  local f created_at task_name
+  f="$(api_state "$1" "$2")"; created_at="${6:-$(date '+%Y-%m-%d %H:%M:%S %z')}"; task_name="${5:--}"
+  mkdir -p "$(dirname "$f")"
+  printf 'PROJECT=%q\nAPI_ID=%q\nAPI_HOST=%q\nAPI_CONTAINER=%q\nTASK_NAME=%q\nCREATED_AT=%q\n' "$1" "$2" "$3" "$4" "$task_name" "$created_at" > "$f"
+}
+write_lib_state() { local f task; f="$(lib_state "$1" "$2")"; task="${5:--}"; mkdir -p "$(dirname "$f")"; printf 'LIBRARY=%q\nLIB_ID=%q\nLIB_HOST=%q\nLIB_CONTAINER=%q\nTASK_NAME=%q\nCREATED_AT=%q\n' "$1" "$2" "$3" "$4" "$task" "$(date '+%Y-%m-%d %H:%M:%S')" > "$f"; }
+
+# 已设置任务名时以任务名作为域名键；旧记录未设置任务名时仍兼容 worktree ID。
+api_route_key() {
+  local api_id="$1" task_name="${2:--}"
+  [ "$task_name" = '-' ] && printf '%s\n' "$api_id" || printf '%s\n' "$task_name"
+}
+
+# 同一项目下的任务名即域名的一部分，必须保持唯一。
+assert_api_route_available() {
+  local project="$1" api_id="$2" task_name="$3" file existing_id existing_task route_key
+  route_key="$(api_route_key "$api_id" "$task_name")"
+  for file in "$API_DIR/${project}"/*.state; do
+    [ -f "$file" ] || continue
+    unset API_ID TASK_NAME; source "$file"
+    existing_id="$API_ID"; existing_task="${TASK_NAME:--}"
+    [ "$existing_id" = "$api_id" ] && continue
+    [ "$(api_route_key "$existing_id" "$existing_task")" = "$route_key" ] || continue
+    die "域名已被 API worktree 占用：${project}--${route_key}.localtest.me（${existing_id}）"
   done
-  return 1
 }
 
-# 任务名和库名已由注册表校验，只动态访问脚本自身维护的变量。
-set_library_path() {
-  local library="$1" path="$2"
-  eval "LIB_PATH_${library}=\$(printf '%q' \"\$path\")"
+resolve_api_id() {
+  local project="$1" reference="$2" file found=''
+  [ -f "$(api_state "$project" "$reference")" ] && { printf '%s\n' "$reference"; return; }
+  for file in "$API_DIR/${project}"/*.state; do
+    [ -f "$file" ] || continue; unset API_ID TASK_NAME; source "$file"
+    [ "${TASK_NAME:--}" = "$reference" ] || continue
+    [ -z "$found" ] || die "任务名对应多个 API worktree：$reference"
+    found="$API_ID"
+  done
+  [ -n "$found" ] || die "未找到 API worktree：${project}/${reference}"; printf '%s\n' "$found"
 }
-
-get_library_path() {
-  local library="$1" value
-  eval "value=\${LIB_PATH_${library}:-}"
-  printf '%s\n' "$value"
+resolve_lib_id() {
+  local library="$1" reference="$2" file found=''
+  [ -f "$(lib_state "$library" "$reference")" ] && { printf '%s\n' "$reference"; return; }
+  for file in "$LIB_DIR/${library}"/*.state; do
+    [ -f "$file" ] || continue; unset LIB_ID TASK_NAME; source "$file"
+    [ "${TASK_NAME:--}" = "$reference" ] || continue
+    [ -z "$found" ] || die "任务名对应多个库 worktree：$reference"
+    found="$LIB_ID"
+  done
+  [ -n "$found" ] || die "未找到库 worktree：${library}/${reference}"; printf '%s\n' "$found"
 }
-
-library_state_name() {
-  case "$1" in
-    tkslib) printf '%s\n' 'LIB_TKSLIB' ;;
-    mcnlib) printf '%s\n' 'LIB_MCNLIB' ;;
-    cmclib) printf '%s\n' 'LIB_CMCLIB' ;;
-    *) die "未知依赖库：$1" ;;
-  esac
+library_target() {
+  local project="$1" api_id="$2" library="$3" key id
+  key="$(library_key "$library")"
+  if [ -f "$(bind_state "$project" "$api_id")" ]; then
+    unset LIB_ID; source "$(bind_state "$project" "$api_id")"; eval "id=\${LIB_${key}_ID:-}"
+    if [ -n "${id:-}" ]; then unset LIB_CONTAINER; load_file "$(lib_state "$library" "$id")"; printf '%s\n' "$LIB_CONTAINER"; return; fi
+  fi
+  library_fallback "$library"
 }
-
-write_state() {
-  local project="$1" task="$2" api_host="$3" api_container="$4" web_path="$5" web_port="$6"
-  shift 6
-  local file tmp library path
-  file="$(state_file "$project" "$task")"
-  tmp="${file}.tmp"
-  {
-    printf 'PROJECT=%q\nTASK=%q\nAPI_HOST=%q\nAPI_CONTAINER=%q\nWEB_PATH=%q\nWEB_PORT=%q\n' \
-      "$project" "$task" "$api_host" "$api_container" "$web_path" "$web_port"
-    for library in $(project_libraries "$project"); do
-      path="$(get_library_path "$library")"
-      path="${path:-$(library_fallback "$library")}" 
-      printf '%s=%q\n' "$(library_state_name "$library")" "$path"
-    done
-  } > "$tmp"
+write_binding() {
+  local project="$1" api_id="$2" target_library="$3" target_id="$4" file tmp library key value
+  file="$(bind_state "$project" "$api_id")"; mkdir -p "$(dirname "$file")"; tmp="${file}.tmp"
+  unset LIB_TKSLIB_ID LIB_MCNLIB_ID LIB_CMCLIB_ID
+  [ -f "$file" ] && source "$file"
+  for library in $(project_libraries "$project"); do
+    key="$(library_key "$library")"; eval "value=\${LIB_${key}_ID:-}"
+    [ "$library" = "$target_library" ] && value="$target_id"
+    [ -n "${value:-}" ] && printf 'LIB_%s_ID=%q\n' "$key" "$value"
+  done > "$tmp"
   mv "$tmp" "$file"
 }
-
-generate_nginx_conf() {
-  local tmp state project task api_container library env path var
-  tmp="$(mktemp "${GENERATED_CONF}.XXXXXX")"
+auto_bind_api() {
+  local project="$1" api_id="$2" library lib_id
+  unset TASK_NAME; load_file "$(api_state "$project" "$api_id")"
+  [ "${TASK_NAME:--}" != '-' ] || return
+  for library in $(project_libraries "$project"); do
+    if lib_id="$(resolve_lib_id "$library" "$TASK_NAME" 2>/dev/null)"; then write_binding "$project" "$api_id" "$library" "$lib_id"; fi
+  done
+}
+ensure_link() {
+  local link="$1" target="$2" existing
+  if [ -L "$link" ]; then [ "$(readlink "$link")" = "$target" ] || { rm "$link"; ln -s "$target" "$link"; }; return; fi
+  if [ -e "$link" ]; then existing="$(container_path "$link")"; [ "$existing" = "$target" ] || die "目录被占用：$link"; return; fi
+  ln -s "$target" "$link"
+}
+sync_api_links() {
+  local project="$1" id="$2" parent library; unset API_HOST; load_file "$(api_state "$project" "$id")"; parent="$(dirname "$API_HOST")"
+  ensure_link "${parent}/vendor" '/www/vendor'
+  for library in $(project_libraries "$project"); do ensure_link "${parent}/${library}" "$(library_target "$project" "$id" "$library")"; done
+}
+cleanup_api_links() {
+  local project="$1" id="$2" file parent other; file="$(api_state "$project" "$id")"; unset API_HOST; load_file "$file"; parent="$(dirname "$API_HOST")"
+  for other in "$API_DIR"/*/*.state; do
+    [ -f "$other" ] || continue; [ "$other" = "$file" ] && continue
+    if ( unset API_HOST; source "$other"; [ "$(dirname "$API_HOST")" = "$parent" ] ); then return; fi
+  done
+  rm -f "${parent}/vendor" "${parent}/tkslib" "${parent}/mcnlib" "${parent}/cmclib"
+}
+generate_nginx() {
+  local tmp f; tmp="$(mktemp "${GENERATED_CONF}.XXXXXX")"
   {
-    echo '# 此文件由 scripts/worktree-dev 自动生成，请勿手工编辑。'
-    for state in "$STATE_DIR"/*.state; do
-      [ -f "$state" ] || continue
-      unset PROJECT TASK API_HOST API_CONTAINER WEB_PATH WEB_PORT
-      # shellcheck disable=SC1090
-      source "$state"
-      project="$PROJECT"; task="$TASK"; api_container="$API_CONTAINER"
+    echo '# 由 worktree-dev 自动生成，请勿手工编辑。'
+    for f in "$API_DIR"/*/*.state; do
+      [ -f "$f" ] || continue; unset PROJECT API_ID API_CONTAINER TASK_NAME; source "$f"
       cat <<EOF
 server {
     listen 80;
-    server_name ${project}--${task}.localtest.me;
-    root ${api_container}/web;
+    server_name ${PROJECT}--$(api_route_key "$API_ID" "${TASK_NAME:--}").localtest.me;
+    root ${API_CONTAINER}/web;
     index index.php;
-
-    location / {
-        try_files \$uri \$uri/ /index.php?\$query_string;
-    }
-
+    location / { try_files \$uri \$uri/ /index.php?\$query_string; }
     location ~ \\.php\$ {
         include fastcgi_params;
         fastcgi_pass php:9000;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-        fastcgi_param VENDOR_PATH /www/vendor;
-EOF
-      for library in $(project_libraries "$project"); do
-        env="$(library_env "$library")"
-        var="$(library_state_name "$library")"
-        eval "path=\${${var}:-}"
-        path="${path:-$(library_fallback "$library")}" 
-        printf '        fastcgi_param %s %s;\n' "$env" "$path"
-      done
-      cat <<'EOF'
     }
 }
 
 EOF
     done
-  } > "$tmp"
-  printf '%s\n' "$tmp"
+  } > "$tmp"; printf '%s\n' "$tmp"
 }
-
 reload_nginx() {
-  local candidate backup had_config=0
-  candidate="$(generate_nginx_conf)"
-  backup="${GENERATED_CONF}.bak"
-  if [ -f "$GENERATED_CONF" ]; then cp "$GENERATED_CONF" "$backup"; had_config=1; fi
-  mv "$candidate" "$GENERATED_CONF"
-  if ! compose exec -T nginx nginx -t; then
-    if [ "$had_config" -eq 1 ]; then mv "$backup" "$GENERATED_CONF"; else rm -f "$GENERATED_CONF"; fi
-    die 'Nginx 配置校验失败，已恢复上一份配置'
+  local candidate backup; candidate="$(generate_nginx)"; backup="${GENERATED_CONF}.bak"
+  [ -f "$GENERATED_CONF" ] && cp "$GENERATED_CONF" "$backup" || true; mv "$candidate" "$GENERATED_CONF"
+  # Codex 创建 worktree 时 Docker 可能尚未启动；配置已落盘，容器启动后会自动加载。
+  if ! compose ps --status running -q nginx | rg -q .; then
+    rm -f "$backup"; info 'Nginx 未运行，路由将在容器启动后生效'; return 0
   fi
-  rm -f "$backup"
-  compose exec -T nginx nginx -s reload
+  if ! compose exec -T nginx nginx -t; then [ -f "$backup" ] && mv "$backup" "$GENERATED_CONF" || rm -f "$GENERATED_CONF"; return 1; fi
+  rm -f "$backup"; compose exec -T nginx nginx -s reload
 }
-
-start_web() {
-  local project="$1" task="$2" web_path="$3" port="$4" api_domain env_file command pid_file
-  [ -f "${web_path}/package.json" ] || die "前端目录不是 Node 项目：$web_path"
-  [[ "$port" =~ ^[1-9][0-9]{3,4}$ ]] || die "无效 Vite 端口：$port"
-  api_domain="http://${project}--${task}.localtest.me:8080"
-  env_file="${web_path}/.env.local"
-  if [ ! -e "$env_file" ]; then
-    printf '# 由 worktree-dev 生成，可安全删除。\nBASE_API_PROXY_DOMAIN=%s\n' "$api_domain" > "$env_file"
-  elif grep -q '^# 由 worktree-dev 生成' "$env_file"; then
-    printf '# 由 worktree-dev 生成，可安全删除。\nBASE_API_PROXY_DOMAIN=%s\n' "$api_domain" > "$env_file"
-  else
-    info "保留已有 ${env_file}，启动进程时仍会注入 API 地址"
-  fi
-  command='pnpm'
-  command -v pnpm >/dev/null 2>&1 || command='npm'
-  pid_file="$(state_file "$project" "$task").vite.pid"
-  (cd "$web_path" && nohup env BASE_API_PROXY_DOMAIN="$api_domain" "$command" exec vite --host 0.0.0.0 --port "$port" > "${web_path}/.worktree-dev-vite.log" 2>&1 & echo $! > "$pid_file")
-}
-
-cmd_up() {
-  local project="$1" task="$2"; shift 2
-  local api='' web='' port='' option library value path api_host api_container
-  [ -n "$(project_repository "$project" 2>/dev/null || true)" ] || die "未知项目：$project"
-  valid_name "$task" || die "任务名只能包含小写字母、数字和连字符"
+cmd_api_up() {
+  local p="$1" id="$2"; shift 2; local host='' container='' task_name='-' option
+  [ -n "$(project_repository "$p" 2>/dev/null || true)" ] || die "未知项目：$p"; valid_name "$id" || die '无效工作区ID'
   while [ "$#" -gt 0 ]; do
     option="$1"; shift
     case "$option" in
-      --api) api="${1:-}"; shift ;;
-      --lib)
-        value="${1:-}"; shift
-        library="${value%%=*}"; path="${value#*=}"
-        [ "$library" != "$value" ] && [ -n "$path" ] || die '--lib 格式必须为 库名=路径'
-        project_has_library "$project" "$library" || die "项目 $project 未声明依赖库：$library"
-        set_library_path "$library" "$(container_path "$path")"
-        ;;
-      --web) web="${1:-}"; shift ;;
-      --port) port="${1:-}"; shift ;;
+      --api) host="$(canonical_path "${1:-}")"; shift ;;
+      --task) task_name="${1:-}"; shift; [ -n "$task_name" ] || die '任务名不能为空' ;;
       *) die "未知参数：$option" ;;
     esac
   done
-  [ -n "$api" ] || die '缺少 --api'
-  [ -z "$web" ] || [ -n "$port" ] || die '使用 --web 时必须同时指定 --port'
-  api_host="$(canonical_path "$api")"
-  [ -f "${api_host}/web/index.php" ] || die "后端目录不是 Yii Web 项目：$api_host"
-  [ "$(basename "$api_host")" = "$(project_repository "$project")" ] || die "后端目录名必须为 $(project_repository "$project")"
-  api_container="$(container_path "$api_host")"
-  mkdir -p "$STATE_DIR"
-  write_state "$project" "$task" "$api_host" "$api_container" "$web" "$port"
-  reload_nginx
-  if [ -n "$web" ]; then start_web "$project" "$task" "$(canonical_path "$web")" "$port"; fi
-  info "已注册：http://${project}--${task}.localtest.me:8080"
+  [ -n "$host" ] || die '缺少 --api'
+  [ "$task_name" = '-' ] || valid_name "$task_name" || die '任务名只能包含小写字母、数字和连字符'
+  [ -f "${host}/web/index.php" ] || die '不是 Yii Web 项目'; [ "$(basename "$host")" = "$(project_repository "$p")" ] || die '项目目录名不匹配'
+  assert_api_route_available "$p" "$id" "$task_name"
+  container="$(container_path "$host")"; write_api_state "$p" "$id" "$host" "$container" "$task_name"; auto_bind_api "$p" "$id"; sync_api_links "$p" "$id"; reload_nginx || die 'Nginx 校验失败，未注册路由'; info "已注册 [${task_name}]：http://${p}--$(api_route_key "$id" "$task_name").localtest.me:8080"
+}
+cmd_set_task() {
+  local p="$1" id task_name="$3"; id="$(resolve_api_id "$p" "$2")"
+  valid_name "$task_name" || die '任务名只能包含小写字母、数字和连字符'
+  unset API_HOST API_CONTAINER CREATED_AT; load_file "$(api_state "$p" "$id")"
+  assert_api_route_available "$p" "$id" "$task_name"
+  write_api_state "$p" "$id" "$API_HOST" "$API_CONTAINER" "$task_name" "${CREATED_AT:-$(date '+%Y-%m-%d %H:%M:%S %z')}"; auto_bind_api "$p" "$id"; sync_api_links "$p" "$id"; reload_nginx || die 'Nginx 校验失败，任务名未更新'
+  info "已标注任务：${p}/${id} → ${task_name}（http://${p}--${task_name}.localtest.me:8080）"
+}
+cmd_lib_up() {
+  local lib="$1" id="$2"; shift 2; local host='' task_name='-' option file p api_id
+  library_fallback "$lib" >/dev/null || die "未知库：$lib"; valid_name "$id" || die '无效工作区ID'
+  while [ "$#" -gt 0 ]; do option="$1"; shift; case "$option" in --path) host="$(canonical_path "${1:-}")"; shift;; --task) task_name="${1:-}"; shift;; *) die "未知参数：$option";; esac; done
+  [ "$task_name" = '-' ] || valid_name "$task_name" || die '任务名只能包含小写字母、数字和连字符'
+  [ -n "$host" ] || die '缺少 --path'; write_lib_state "$lib" "$id" "$host" "$(container_path "$host")" "$task_name"
+  # 库稍后创建时，自动绑定所有同任务名且依赖该库的 API。
+  if [ "$task_name" != '-' ]; then for file in "$API_DIR"/*/*.state; do [ -f "$file" ] || continue; unset PROJECT API_ID TASK_NAME; source "$file"; p="$PROJECT"; api_id="$API_ID"; if [ "${TASK_NAME:--}" = "$task_name" ] && project_has_library "$p" "$lib"; then write_binding "$p" "$api_id" "$lib" "$id"; sync_api_links "$p" "$api_id"; fi; done; reload_nginx || die 'Nginx 校验失败，库注册未完成'; fi
+  info "已注册库 [${task_name}]：${lib}/${id}"
+}
+cmd_bind() {
+  local p="$1" id; id="$(resolve_api_id "$p" "$2")"; shift 2; local opt value lib lid
+  load_file "$(api_state "$p" "$id")"
+  while [ "$#" -gt 0 ]; do
+    opt="$1"; shift; [ "$opt" = '--lib' ] || die "未知参数：$opt"; value="$1"; shift; lib="${value%%=*}"; lid="${value#*=}"
+    [ "$lib" != "$value" ] || die '--lib 格式必须为 库名=工作区ID'; project_has_library "$p" "$lib" || die "项目未声明库：$lib"; lid="$(resolve_lib_id "$lib" "$lid")"; write_binding "$p" "$id" "$lib" "$lid"
+  done
+  sync_api_links "$p" "$id"; reload_nginx || die 'Nginx 校验失败，绑定未生效'; info "已绑定：${p}/${id}"
+}
+cmd_api_down() { local id="$(resolve_api_id "$1" "$2")"; cleanup_api_links "$1" "$id"; rm -f "$(api_state "$1" "$id")" "$(bind_state "$1" "$id")"; reload_nginx || die 'Nginx 校验失败'; }
+cmd_lib_down() {
+  local lib="$1" id; id="$(resolve_lib_id "$lib" "$2")"; [ -f "$(lib_state "$lib" "$id")" ] || die '库 worktree 未注册'
+  if rg -l "^LIB_$(library_key "$lib")_ID=${id}$" "$BIND_DIR" >/dev/null 2>&1; then die '该库仍被 API 绑定，请先清理或改绑 API'; fi
+  rm -f "$(lib_state "$lib" "$id")"; info "已移除库：${lib}/${id}"
 }
 
-cmd_down() {
-  local project="$1" task="$2" file pid_file
-  load_state "$project" "$task"
-  file="$(state_file "$project" "$task")"; pid_file="${file}.vite.pid"
-  if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then kill "$(cat "$pid_file")"; fi
-  rm -f "$pid_file" "$file"
-  reload_nginx
-  info "已移除：$project/$task"
+# 返回 API 已绑定的库列表；未绑定时由调用方展示主工作区回退状态。
+api_binding_summary() {
+  local project="$1" api_id="$2" library key value output=''
+  [ -f "$(bind_state "$project" "$api_id")" ] || return 0
+  unset LIB_TKSLIB_ID LIB_MCNLIB_ID LIB_CMCLIB_ID
+  source "$(bind_state "$project" "$api_id")"
+  for library in $(project_libraries "$project"); do
+    key="$(library_key "$library")"; eval "value=\${LIB_${key}_ID:-}"
+    [ -n "${value:-}" ] && output="${output}${output:+、}${library}/${value}"
+  done
+  printf '%s\n' "$output"
+}
+
+# 返回正在使用指定库 worktree 的 API 列表，供库卡片显示反向关联。
+library_reference_summary() {
+  local library="$1" id="$2" key file value project api_id output=''
+  key="$(library_key "$library")"
+  for file in "$BIND_DIR"/*/*.state; do
+    [ -f "$file" ] || continue
+    unset LIB_TKSLIB_ID LIB_MCNLIB_ID LIB_CMCLIB_ID
+    source "$file"; eval "value=\${LIB_${key}_ID:-}"
+    [ "${value:-}" = "$id" ] || continue
+    project="$(basename "$(dirname "$file")")"; api_id="$(basename "${file%.state}")"
+    output="${output}${output:+、}${project}/${api_id}"
+  done
+  printf '%s\n' "$output"
 }
 
 cmd_list() {
-  local file
-  printf '%-16s %-20s %-46s %s\n' '项目' '任务' '后端路径' '前端端口'
-  for file in "$STATE_DIR"/*.state; do
-    [ -f "$file" ] || continue
-    unset PROJECT TASK API_HOST WEB_PORT
-    # shellcheck disable=SC1090
-    source "$file"
-    printf '%-16s %-20s %-46s %s\n' "$PROJECT" "$TASK" "$API_HOST" "${WEB_PORT:--}"
+  local f created_at bindings references path count=0
+  init_output_style
+  printf '%sAPI worktree：%s\n' "$STYLE_TITLE" "$STYLE_RESET"
+  for f in "$API_DIR"/*/*.state; do
+    [ -f "$f" ] || continue; count=$((count + 1)); unset PROJECT API_ID API_HOST TASK_NAME CREATED_AT; source "$f"
+    created_at="${CREATED_AT:--}"; created_at="${created_at%% +*}"
+    path="$(short_host_path "$API_HOST")"; bindings="$(api_binding_summary "$PROJECT" "$API_ID")"
+    [ -n "$bindings" ] || bindings='未绑定（使用主工作区库）'
+    printf '  %s%s/%s%s  %s[%s]%s  %s\n' "$STYLE_OK" "$PROJECT" "$API_ID" "$STYLE_RESET" "$STYLE_TASK" "${TASK_NAME:--}" "$STYLE_RESET" "$created_at"
+    printf '  %s路径：%s%s\n' "$STYLE_MUTED" "$path" "$STYLE_RESET"
+    printf '  %s关联：%s%s\n\n' "$STYLE_MUTED" "$bindings" "$STYLE_RESET"
+  done
+  [ "$count" -gt 0 ] || printf '  %s（暂无）%s\n\n' "$STYLE_MUTED" "$STYLE_RESET"
+  printf '%s库 worktree：%s\n' "$STYLE_TITLE" "$STYLE_RESET"; count=0
+  for f in "$LIB_DIR"/*/*.state; do
+    [ -f "$f" ] || continue; count=$((count + 1)); unset LIBRARY LIB_ID LIB_HOST TASK_NAME CREATED_AT; source "$f"
+    created_at="${CREATED_AT:--}"; created_at="${created_at%% +*}"
+    path="$(short_host_path "$LIB_HOST")"; references="$(library_reference_summary "$LIBRARY" "$LIB_ID")"
+    [ -n "$references" ] || references='未被 API 关联'
+    printf '  %s%s/%s%s  %s[%s]%s  %s\n' "$STYLE_OK" "$LIBRARY" "$LIB_ID" "$STYLE_RESET" "$STYLE_TASK" "${TASK_NAME:--}" "$STYLE_RESET" "$created_at"
+    printf '  %s路径：%s%s\n' "$STYLE_MUTED" "$path" "$STYLE_RESET"
+    printf '  %s被关联：%s%s\n\n' "$STYLE_MUTED" "$references" "$STYLE_RESET"
+  done
+  [ "$count" -gt 0 ] || printf '  %s（暂无）%s\n' "$STYLE_MUTED" "$STYLE_RESET"
+}
+cmd_cli() { local p="$1" id; id="$(resolve_api_id "$p" "$2")"; shift 2; unset API_CONTAINER; load_file "$(api_state "$p" "$id")"; compose exec -T php sh -lc "cd '${API_CONTAINER}' && exec php yii-test \"\$@\"" -- "$@"; }
+migrate_legacy_states() {
+  local f
+  # 兼容旧版 runtime/worktree-dev/<项目>--<ID>.state 状态文件。
+  for f in "$STATE_DIR"/*.state; do
+    [ -f "$f" ] || continue
+    unset PROJECT TASK API_HOST API_CONTAINER
+    source "$f"
+    [ -n "${PROJECT:-}" ] && [ -n "${TASK:-}" ] && [ -n "${API_HOST:-}" ] && [ -n "${API_CONTAINER:-}" ] || continue
+    [ -f "$(api_state "$PROJECT" "$TASK")" ] || write_api_state "$PROJECT" "$TASK" "$API_HOST" "$API_CONTAINER" '-'
+    rm -f "$f"
+    info "已迁移旧注册：${PROJECT}/${TASK}"
   done
 }
-
-cmd_cli() {
-  local project="$1" task="$2"; shift 2
-  load_state "$project" "$task"
-  local args=(exec -T -e VENDOR_PATH=/www/vendor) library env var path
-  for library in $(project_libraries "$PROJECT"); do
-    env="$(library_env "$library")"; var="$(library_state_name "$library")"; eval "path=\${${var}:-}"; path="${path:-$(library_fallback "$library")}" 
-    args+=(-e "${env}=${path}")
-  done
-  args+=(sh -lc "cd '${API_CONTAINER}' && exec php yii-test \"\$@\"" -- "$@")
-  compose "${args[@]}"
-}
-
 main() {
-  local command="${1:-}"; shift || true
-  case "$command" in
-    up) [ "$#" -ge 2 ] || { usage; exit 1; }; cmd_up "$@" ;;
-    down) [ "$#" -eq 2 ] || { usage; exit 1; }; cmd_down "$@" ;;
+  migrate_legacy_states
+  local cmd="${1:-}"; shift || true
+  case "$cmd" in
+    api-up) [ "$#" -ge 4 ] || { usage; exit 1; }; cmd_api_up "$@" ;;
+    set-task) [ "$#" -eq 3 ] || { usage; exit 1; }; cmd_set_task "$@" ;;
+    lib-up) [ "$#" -ge 4 ] || { usage; exit 1; }; cmd_lib_up "$@" ;;
+    bind) [ "$#" -ge 4 ] || { usage; exit 1; }; cmd_bind "$@" ;;
+    api-down|down) [ "$#" -eq 2 ] || { usage; exit 1; }; cmd_api_down "$@" ;;
+    lib-down) [ "$#" -eq 2 ] || { usage; exit 1; }; cmd_lib_down "$@" ;;
+    reload) [ "$#" -eq 0 ] || { usage; exit 1; }; reload_nginx ;;
     list) [ "$#" -eq 0 ] || { usage; exit 1; }; cmd_list ;;
     cli) [ "$#" -ge 3 ] || { usage; exit 1; }; cmd_cli "$@" ;;
     *) usage; exit 1 ;;
   esac
 }
-
 main "$@"

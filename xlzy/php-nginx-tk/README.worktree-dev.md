@@ -1,43 +1,104 @@
-# 多项目 Worktree 本地联调
+# 多项目 Codex Worktree 联调
 
-首次更新本目录后，需要重建 PHP 与 Nginx 容器，使它们获得 Codex worktree 挂载：
+首次启用或更新 Compose 后，重建容器以挂载 `~/.codex/worktrees`：
 
 ```bash
 docker compose up -d --force-recreate nginx php
 ```
 
-使用 `scripts/worktree-dev` 注册任务。项目标识来自 `config/worktree-projects.sh`，任务名用于将后端、依赖库和前端 worktree 配对。
+如果 Codex 在 Docker 尚未启动时创建了 worktree，设置脚本会成功写入路由但不会 reload；启动容器后执行：
 
 ```bash
-scripts/worktree-dev up mcn-api order-fix \
-  --api /Users/hujia/.codex/worktrees/api-123/mcn-api.tiktoksaas.com \
-  --lib mcnlib=/Users/hujia/.codex/worktrees/lib-456/mcnlib \
-  --lib tkslib=/Users/hujia/.codex/worktrees/lib-789/tkslib
+worktree-dev reload
 ```
 
-后端地址为：
+共享 Composer 依赖固定使用 `/www/vendor`，无需为每个 worktree 执行 `composer install`。脚本在 API worktree 父目录创建仅供容器解析的 `vendor` 与依赖库链接，项目源码保持原有相对路径加载方式。
 
-```text
-http://mcn-api--order-fix.localtest.me:8080
+## Codex 本地环境配置
+
+在每个项目的 Codex「本地环境」填写设置、清理脚本。Codex 会提供 `$CODEX_WORKTREE_PATH`。
+
+### API 设置脚本
+
+在 `affiliate-api.tiktoksaas.com` 填入：
+
+```zsh
+#!/bin/zsh
+set -euo pipefail
+WORKTREE_DEV="/Users/hujia/myproject/docker/xlzy/php-nginx-tk/scripts/worktree-dev"
+WORKTREE_ID="$(basename "$(dirname "$CODEX_WORKTREE_PATH")")"
+TASK_NAME="${WORKTREE_TASK_NAME:-}"
+if [[ -z "$TASK_NAME" ]]; then
+  TASK_NAME="$(osascript -e 'text returned of (display dialog "请输入任务名（例如 lion-ux）" default answer "")')"
+fi
+"$WORKTREE_DEV" api-up affiliate-api "$WORKTREE_ID" --api "$CODEX_WORKTREE_PATH" --task "$TASK_NAME"
 ```
 
-需要前端联调时附加 `--web` 和 `--port`。脚本会写入未纳入 Git 的 `.env.local`，并将 `/baseapi` 代理到同一任务的后端。
+`mcn-api.tiktoksaas.com`、`cmc-api.tiktoksaas.com` 使用相同脚本，仅将项目标识替换为 `mcn-api`、`cmc-api`。
 
-```bash
-scripts/worktree-dev up affiliate-api order-fix \
-  --api /Users/hujia/.codex/worktrees/api-123/affiliate-api.tiktoksaas.com \
-  --web /Users/hujia/.codex/worktrees/web-123/affiliate.tiktoksaas.com \
-  --port 5174
+API 清理脚本：
+
+```zsh
+#!/bin/zsh
+WORKTREE_DEV="/Users/hujia/myproject/docker/xlzy/php-nginx-tk/scripts/worktree-dev"
+WORKTREE_ID="$(basename "$(dirname "$CODEX_WORKTREE_PATH")")"
+"$WORKTREE_DEV" api-down affiliate-api "$WORKTREE_ID" || true
 ```
 
-未传入某个 `--lib` 时，脚本会回退到 `/www` 中的主工作区库。共享 `vendor` 始终使用 `/www/vendor`，不需要为每个 worktree 运行 Composer。
+### 库设置脚本
+
+在 `tkslib` 填入：
+
+```zsh
+#!/bin/zsh
+set -euo pipefail
+WORKTREE_DEV="/Users/hujia/myproject/docker/xlzy/php-nginx-tk/scripts/worktree-dev"
+WORKTREE_ID="$(basename "$(dirname "$CODEX_WORKTREE_PATH")")"
+TASK_NAME="${WORKTREE_TASK_NAME:-}"
+if [[ -z "$TASK_NAME" ]]; then
+  TASK_NAME="$(osascript -e 'text returned of (display dialog "请输入任务名（例如 lion-ux）" default answer "")')"
+fi
+"$WORKTREE_DEV" lib-up tkslib "$WORKTREE_ID" --path "$CODEX_WORKTREE_PATH" --task "$TASK_NAME"
+```
+
+`mcnlib`、`cmclib` 使用相同脚本，替换库名。库清理脚本：
+
+```zsh
+#!/bin/zsh
+WORKTREE_DEV="/Users/hujia/myproject/docker/xlzy/php-nginx-tk/scripts/worktree-dev"
+WORKTREE_ID="$(basename "$(dirname "$CODEX_WORKTREE_PATH")")"
+"$WORKTREE_DEV" lib-down tkslib "$WORKTREE_ID" || true
+```
+
+## 完整流程
+
+1. 创建 API worktree，弹窗输入任务名：自动注册 API 路由。
+2. 创建需要修改的库 worktree，在同一弹窗输入**相同任务名**：自动注册该库并自动关联同任务名 API。
+3. 执行 `worktree-dev list` 查看两个区块：`API worktree：` 和 `库 worktree：`。API 每行依次为工作区、路径、任务名、关联库、注册时间。
+4. 未在创建时填写任务名时，可手工标注：
+
+   ```bash
+   worktree-dev set-task affiliate-api <api-id> lion-ux
+   ```
+
+   `worktree-dev list` 会显示任务名和注册时间。也可以手工注册时直接使用 `--task lion-ux`。
+
+5. 同名自动关联不符合预期时，可显式绑定本期开发使用的库：
+
+   ```bash
+   worktree-dev bind affiliate-api lion-ux --lib tkslib=lion-ux
+   worktree-dev bind mcn-api lion-ux --lib mcnlib=lion-ux --lib tkslib=lion-ux
+   worktree-dev bind cmc-api lion-ux --lib cmclib=lion-ux --lib tkslib=lion-ux
+   ```
+
+6. 访问 `http://<项目标识>--<任务名>.localtest.me:8080`，例如 `http://affiliate-api--lion-ux.localtest.me:8080`。未设置任务名的旧记录兼容使用 `<api-id>`。
+7. Codex 删除 API worktree 时自动移除路由和链接。删除仍被绑定的库时清理会安全失败，提示先清理或改绑 API。
 
 常用命令：
 
 ```bash
-scripts/worktree-dev list
-scripts/worktree-dev cli mcn-api order-fix <yii 参数>
-scripts/worktree-dev down mcn-api order-fix
+worktree-dev list
+worktree-dev cli mcn-api lion-ux <yii 参数>
+worktree-dev api-down mcn-api lion-ux
+worktree-dev lib-down tkslib lion-ux
 ```
-
-`down` 只移除自动生成的 Nginx 路由和由脚本启动的 Vite 进程，不删除 worktree 或运行数据。

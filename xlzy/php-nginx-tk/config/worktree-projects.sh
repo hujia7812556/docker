@@ -19,15 +19,6 @@ project_libraries() {
   esac
 }
 
-library_env() {
-  case "$1" in
-    tkslib) printf '%s\n' 'TKS_LIB_PATH' ;;
-    mcnlib) printf '%s\n' 'MCN_LIB_PATH' ;;
-    cmclib) printf '%s\n' 'CMC_LIB_PATH' ;;
-    *) return 1 ;;
-  esac
-}
-
 library_fallback() {
   case "$1" in
     tkslib) printf '%s\n' '/www/tkslib' ;;
