@@ -60,6 +60,7 @@ usage() { cat <<'EOF'
   worktree-dev set-task <项目> <API工作区ID或任务名> <任务名>
   worktree-dev lib-up <库名> <库工作区ID> --path <路径> [--task <任务名>]
   worktree-dev bind <项目> <API工作区ID或任务名> --lib <库名>=<库工作区ID或任务名> [--lib ...]
+  worktree-dev unbind <项目> <API工作区ID或任务名> --lib <库名>
   worktree-dev api-down <项目> <API工作区ID或任务名>
   worktree-dev lib-down <库名> <库工作区ID或任务名>
   worktree-dev reload
@@ -139,6 +140,25 @@ write_binding() {
   done > "$tmp"
   mv "$tmp" "$file"
 }
+
+# 删除某个库的显式绑定；未绑定的库将由 library_target() 回退到主工作区。
+remove_binding() {
+  local project="$1" api_id="$2" target_library="$3" file tmp library key value found=0
+  file="$(bind_state "$project" "$api_id")"
+  [ -f "$file" ] || die "API 未绑定库：${target_library}"
+  unset LIB_TKSLIB_ID LIB_MCNLIB_ID LIB_CMCLIB_ID
+  source "$file"
+  key="$(library_key "$target_library")"; eval "value=\${LIB_${key}_ID:-}"
+  [ -n "${value:-}" ] || die "API 未绑定库：${target_library}"
+  tmp="${file}.tmp"
+  for library in $(project_libraries "$project"); do
+    key="$(library_key "$library")"; eval "value=\${LIB_${key}_ID:-}"
+    [ "$library" = "$target_library" ] && continue
+    [ -n "${value:-}" ] && { printf 'LIB_%s_ID=%q\n' "$key" "$value"; found=1; }
+  done > "$tmp"
+  if [ "$found" -eq 1 ]; then mv "$tmp" "$file"; else rm -f "$tmp" "$file"; fi
+}
+
 auto_bind_api() {
   local project="$1" api_id="$2" library lib_id
   unset TASK_NAME; load_file "$(api_state "$project" "$api_id")"
@@ -245,6 +265,14 @@ cmd_bind() {
   done
   sync_api_links "$p" "$id"; reload_nginx || die 'Nginx 校验失败，绑定未生效'; info "已绑定：${p}/${id}"
 }
+cmd_unbind() {
+  local p="$1" id option lib
+  id="$(resolve_api_id "$p" "$2")"; option="$3"; lib="$4"
+  [ "$option" = '--lib' ] || die "未知参数：$option"
+  project_has_library "$p" "$lib" || die "项目未声明库：$lib"
+  remove_binding "$p" "$id" "$lib"; sync_api_links "$p" "$id"
+  info "已解除绑定：${p}/${id} → ${lib}（已回退主工作区）"
+}
 cmd_api_down() { local id="$(resolve_api_id "$1" "$2")"; cleanup_api_links "$1" "$id"; rm -f "$(api_state "$1" "$id")" "$(bind_state "$1" "$id")"; reload_nginx || die 'Nginx 校验失败'; }
 cmd_lib_down() {
   local lib="$1" id; id="$(resolve_lib_id "$lib" "$2")"; [ -f "$(lib_state "$lib" "$id")" ] || die '库 worktree 未注册'
@@ -328,6 +356,7 @@ main() {
     set-task) [ "$#" -eq 3 ] || { usage; exit 1; }; cmd_set_task "$@" ;;
     lib-up) [ "$#" -ge 4 ] || { usage; exit 1; }; cmd_lib_up "$@" ;;
     bind) [ "$#" -ge 4 ] || { usage; exit 1; }; cmd_bind "$@" ;;
+    unbind) [ "$#" -eq 4 ] || { usage; exit 1; }; cmd_unbind "$@" ;;
     api-down|down) [ "$#" -eq 2 ] || { usage; exit 1; }; cmd_api_down "$@" ;;
     lib-down) [ "$#" -eq 2 ] || { usage; exit 1; }; cmd_lib_down "$@" ;;
     reload) [ "$#" -eq 0 ] || { usage; exit 1; }; reload_nginx ;;

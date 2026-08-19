@@ -91,6 +91,13 @@ WORKTREE_ID="$(basename "$(dirname "$CODEX_WORKTREE_PATH")")"
    worktree-dev bind cmc-api lion-ux --lib cmclib=lion-ux --lib tkslib=lion-ux
    ```
 
+   如需清理某个库 worktree，先解除 API 绑定；该 API 会立即回退使用主工作区库：
+
+   ```bash
+   worktree-dev unbind affiliate-api lion-ux --lib tkslib
+   worktree-dev lib-down tkslib lion-ux
+   ```
+
 6. 访问 `http://<项目标识>--<任务名>.localtest.me:8080`，例如 `http://affiliate-api--lion-ux.localtest.me:8080`。未设置任务名的旧记录兼容使用 `<api-id>`。
 7. Codex 删除 API worktree 时自动移除路由和链接。删除仍被绑定的库时清理会安全失败，提示先清理或改绑 API。
 
@@ -100,5 +107,6 @@ WORKTREE_ID="$(basename "$(dirname "$CODEX_WORKTREE_PATH")")"
 worktree-dev list
 worktree-dev cli mcn-api lion-ux <yii 参数>
 worktree-dev api-down mcn-api lion-ux
+worktree-dev unbind mcn-api lion-ux --lib tkslib
 worktree-dev lib-down tkslib lion-ux
 ```
